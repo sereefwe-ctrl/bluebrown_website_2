@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+.localized
+
+# Windows
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Logs
+*.log
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Media & misc Desktop files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.avif
+*.svg
+*.mp4
+*.mov
+*.zip
+*.dmg
+*.pdf
+*.xlsx
+*.csv
+*.ai
+*.avif
+
+# Folders
+Archive/
+Archive-260216/
+Bain_Capital_Ventures/
+Companies/
+Genspark/
+March/
+March\ Deals/
+May/
+nextchapter/
+Untitled\ design/
+untitled\ folder/
+untitled\ folder\ 2/
+
+# Other html files (not our project)
+index1.html
+index3.html
+speakers.html
