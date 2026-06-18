@@ -158,6 +158,62 @@
       color: #aaa;
     }
 
+    .portfolio-card {
+      background-color: #f5f4f0;
+      border-radius: 12px;
+      padding: 40px 48px;
+      max-width: 780px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-top: 20px;
+    }
+
+    .portfolio-card h2 {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .portfolio-card p {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 28px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .portfolio-box {
+      background-color: #eeecea;
+      border: 1.5px solid #e0dedd;
+      border-radius: 10px;
+      height: 120px;
+    }
+
+    @media (max-width: 600px) {
+      .portfolio-card {
+        padding: 28px 20px;
+        border-radius: 10px;
+      }
+
+      .portfolio-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .portfolio-box {
+        height: 80px;
+      }
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 70px 12px 40px;
