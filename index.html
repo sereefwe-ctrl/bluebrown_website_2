@@ -101,13 +101,14 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
-    .icon {
-      position: absolute;
-      top: 24px;
-      right: 28px;
-      width: 36px;
-      height: 36px;
-      opacity: 0.35;
+    @keyframes spinPause {
+      0%   { transform: rotate(0deg); }
+      68%  { transform: rotate(720deg); }
+      100% { transform: rotate(720deg); }
+    }
+
+    .logo-spin {
+      animation: spinPause 4.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
 
     .content {
