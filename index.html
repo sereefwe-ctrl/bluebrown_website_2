@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Orbit Engineering</title>
+  <title>BlueBrown Partners</title>
   <style>
     *, *::before, *::after {
       box-sizing: border-box;
@@ -19,6 +19,47 @@
       justify-content: center;
       font-family: 'Courier New', Courier, monospace;
       padding: 40px 20px;
+      position: relative;
+    }
+
+    .bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    .grain {
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      animation: grain 0.5s steps(1) infinite;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    @keyframes grain {
+      0%  { transform: translate(0, 0); }
+      10% { transform: translate(-2%, -3%); }
+      20% { transform: translate(3%, 2%); }
+      30% { transform: translate(-1%, 4%); }
+      40% { transform: translate(4%, -1%); }
+      50% { transform: translate(-3%, 3%); }
+      60% { transform: translate(2%, -4%); }
+      70% { transform: translate(-4%, 1%); }
+      80% { transform: translate(1%, -2%); }
+      90% { transform: translate(3%, 4%); }
+      100%{ transform: translate(-2%, -1%); }
     }
 
     .card {
@@ -28,15 +69,17 @@
       max-width: 780px;
       width: 100%;
       position: relative;
+      z-index: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
-    .logo {
+    .icon {
       position: absolute;
       top: 24px;
-      left: 32px;
-      width: 110px;
-      height: auto;
+      right: 28px;
+      width: 36px;
+      height: 36px;
+      opacity: 0.35;
     }
 
     .content {
@@ -57,25 +100,43 @@
       font-weight: 700;
     }
 
+    .content a {
+      color: inherit;
+      text-decoration: underline;
+    }
+
     .footer {
       margin-top: 2.4em;
       font-size: 14px;
-      color: #999;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="content">
-      <p>Hello internet,</p>
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="attentionx-site/images/flora.mp4" type="video/mp4" />
+  </video>
+  <div class="grain"></div>
 
-      <p>We are an early-stage venture fund investing in technical founders with Napoleonic ambitions as early as possible.</p>
+  <div class="card">
+    <!-- Slash/strikethrough icon in top-right, matching the example -->
+    <svg class="icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="18" cy="18" r="16" stroke="#1a1a1a" stroke-width="2.2"/>
+      <line x1="26" y1="10" x2="10" y2="26" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+
+    <div class="content">
+      <p>Hello Internet,</p>
+
+      <p><b>We are an early-stage venture fund</b> investing in technical founders with Napoleonic ambitions as early as possible.</p>
 
       <p>Founded by <a href="https://www.cnbc.com/2021/09/07/olaga-studios-17-year-old-korean-ceo-on-making-1-million-in-sales.html" target="_blank">Sukone Hong</a> and <a href="https://africa.harvard.edu/people/julia-c-lee" target="_blank">Julia C. Lee</a>, an exited founder and a Harvard professor, we have always been surrounded by young, ambitious technical builders determined to create the future. We wanted to back these exceptional founders from the very beginning, and so we launched our fund.</p>
 
       <p>We invest $1–$500K checks into technical founders from day one.<br>Our core value-add is helping our founders execute GTM strategies across Asian markets, with a particular focus on South Korea.</p>
 
-      <p>Oh, and we also host a lot of fun <a href="https://www.linkedin.com/posts/my-name-is-sukone_openai-startup-meetup-seoul-we-brought-ugcPost-7455916799352754176-4zfn/?utm_source=share&utm_medium=member_desktop&rcm=ACoAADWq7eMBWK0j5S21KdulRiSjBwpQUT6g4YM" target="_blank">events!</a></p>
+      <p>Our task is to back the people who break the constraints of what's possible. To build the future. To make endless <b>magic.</b></p>
+
+      <p>This is <b>the mission</b> of our lives.</p>
 
       <p class="footer">contact &mdash; team [at] bluebrown.vc</p>
     </div>
