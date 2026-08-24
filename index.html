@@ -380,6 +380,14 @@
           mainLogo.style.visibility = '';
           wrapper.style.display = 'none';
           loadingScreen.classList.add('hidden');
+
+          // Stagger-reveal all text
+          var revealEls = document.querySelectorAll('.reveal-text');
+          revealEls.forEach(function(el, i) {
+            setTimeout(function() {
+              el.classList.add('revealed');
+            }, i * 110);
+          });
         }, 780);
       });
     }, 1800);
