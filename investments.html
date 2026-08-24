@@ -112,7 +112,6 @@
       padding: 56px 64px 48px 64px;
       max-width: 780px;
       max-height: 80vh;
-      overflow-y: auto;
       width: 100%;
       position: fixed;
       top: 50%;
@@ -149,6 +148,11 @@
       height: 100%;
       object-fit: contain;
       animation: spinLogo 8s linear infinite;
+    }
+
+    .content-scroll {
+      max-height: calc(80vh - 104px);
+      overflow-y: auto;
     }
 
     .content {
@@ -411,6 +415,7 @@
       <a href="essays.html" data-scramble class="cursor-link" data-cursor-label="essays">Essays</a>
     </nav>
     <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite; opacity: 0;" />
+<div class="content-scroll">
 <div class="content">
       <p class="invest-sub" data-scramble>portfolio</p>
       <div class="invest-list">
@@ -439,6 +444,7 @@
           <span class="invest-round" data-scramble>friends &amp; family round</span>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
