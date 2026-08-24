@@ -152,6 +152,12 @@
     .content-scroll {
       max-height: 360px;
       overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .content-scroll::-webkit-scrollbar {
+      display: none;
     }
 
     .content {
