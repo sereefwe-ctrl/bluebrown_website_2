@@ -112,12 +112,25 @@
       padding: 56px 64px 48px 64px;
       max-width: 780px;
       width: 100%;
+      height: 500px;
+      box-sizing: border-box;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, calc(-50% + 23px));
       z-index: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .content-scroll {
+      height: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .content-scroll::-webkit-scrollbar {
+      display: none;
     }
 
     #loading-screen {
@@ -317,6 +330,7 @@
         padding: 60px 20px 28px;
         border-radius: 10px;
         width: 92%;
+        height: 70vh;
       }
 
       .card img[src*="BB LOGO2"] {
@@ -368,8 +382,10 @@
       <a href="essays.html" data-scramble class="cursor-link" data-cursor-label="essays">Essays</a>
     </nav>
     <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite; opacity: 0;" />
+<div class="content-scroll">
 <div class="content">
     </div>
+</div>
   </div>
 
   <script>
