@@ -110,7 +110,7 @@
       -webkit-backdrop-filter: blur(8px);
       border-radius: 12px;
       padding: 56px 64px 48px 64px;
-      max-width: 780px;
+      max-width: 900px;
       width: 100%;
       position: fixed;
       top: 50%;
@@ -157,6 +157,57 @@
 
     .content p {
       margin-bottom: 1.4em;
+    }
+
+    .invest-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 32px;
+    }
+
+    .invest-sub {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+
+    .invest-list {
+      border-top: 1px solid rgba(0,0,0,0.12);
+    }
+
+    .invest-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.12);
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+
+    .invest-row .invest-name a {
+      color: #1a1a1a;
+      text-decoration: underline;
+    }
+
+    .invest-row .invest-round {
+      color: #999;
+      white-space: nowrap;
+      font-size: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .invest-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .invest-title {
+        font-size: 24px;
+      }
     }
 
     #cursor-dot {
@@ -369,6 +420,34 @@
     </nav>
     <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite; opacity: 0;" />
 <div class="content">
+      <p class="invest-title" data-scramble>investments</p>
+      <p class="invest-sub" data-scramble>portfolio</p>
+      <div class="invest-list">
+        <div class="invest-row">
+          <span class="invest-name"><a href="#" data-scramble class="cursor-link" data-cursor-label="morphic">Morphic</a> by <a href="#" data-scramble class="cursor-link" data-cursor-label="joshua sum">Joshua Sum</a></span>
+          <span class="invest-round" data-scramble>friends &amp; family round</span>
+        </div>
+        <div class="invest-row">
+          <span class="invest-name"><a href="#" data-scramble class="cursor-link" data-cursor-label="launchpoint">Launchpoint</a> by <a href="#" data-scramble class="cursor-link" data-cursor-label="tristan rhee">Tristan Rhee</a></span>
+          <span class="invest-round" data-scramble>seed round</span>
+        </div>
+        <div class="invest-row">
+          <span class="invest-name"><a href="#" data-scramble class="cursor-link" data-cursor-label="fahrenheit">Fahrenheit (&deg;F)</a> by <a href="#" data-scramble class="cursor-link" data-cursor-label="nathan zhao">Nathan Zhao</a></span>
+          <span class="invest-round" data-scramble>friends &amp; family round</span>
+        </div>
+        <div class="invest-row">
+          <span class="invest-name"><a href="#" data-scramble class="cursor-link" data-cursor-label="phynite">Phynite</a> by <a href="#" data-scramble class="cursor-link" data-cursor-label="andy park">Andy Park</a></span>
+          <span class="invest-round" data-scramble>friends &amp; family round</span>
+        </div>
+        <div class="invest-row">
+          <span class="invest-name" data-scramble>Stealth, robotics</span>
+          <span class="invest-round" data-scramble>friends &amp; family round</span>
+        </div>
+        <div class="invest-row">
+          <span class="invest-name" data-scramble>Stealth, world model</span>
+          <span class="invest-round" data-scramble>friends &amp; family round</span>
+        </div>
+      </div>
     </div>
   </div>
 
