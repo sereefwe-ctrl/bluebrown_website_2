@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Essays — BlueBrown Partners</title>
+  <link rel="icon" type="image/png" href="Images/123.png" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #2b2b2b;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Courier New', Courier, monospace;
+      position: relative;
+    }
+
+    .bg-video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    .grain {
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      animation: grain 0.5s steps(1) infinite;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    @keyframes spinLogo {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes grain {
+      0%  { transform: translate(0, 0); }
+      10% { transform: translate(-2%, -3%); }
+      20% { transform: translate(3%, 2%); }
+      30% { transform: translate(-1%, 4%); }
+      40% { transform: translate(4%, -1%); }
+      50% { transform: translate(-3%, 3%); }
+      60% { transform: translate(2%, -4%); }
+      70% { transform: translate(-4%, 1%); }
+      80% { transform: translate(1%, -2%); }
+      90% { transform: translate(3%, 4%); }
+      100%{ transform: translate(-2%, -1%); }
+    }
+
+    .nav {
+      position: absolute;
+      top: -46px;
+      right: 0;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .nav a {
+      background: rgba(245, 244, 240, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #1c1c1c;
+      text-decoration: none;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+
+    .nav a:hover {
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .card {
+      background-color: rgba(245, 244, 240, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 56px 64px 48px 64px;
+      max-width: 780px;
+      width: 100%;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% + 23px));
+      z-index: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      z-index: 9999;
+      pointer-events: all;
+      transition: opacity 0.5s ease;
+    }
+
+    #loading-screen.hidden {
+      display: none;
+    }
+
+    #floating-logo-wrapper {
+      position: fixed;
+      z-index: 10000;
+      width: 220px;
+      height: 220px;
+      pointer-events: none;
+    }
+
+    #floating-logo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      animation: spinLogo 8s linear infinite;
+    }
+
+    .content {
+      font-size: 16px;
+      line-height: 1.75;
+      color: #1a1a1a;
+    }
+
+    .content p {
+      margin-bottom: 1.4em;
+    }
+
+    #cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(30, 30, 28, 0.4);
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      border: 1px solid rgba(244, 241, 232, 0.55);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      pointer-events: none;
+      transform: translate(-999px, -999px) translate(-50%, -50%);
+      opacity: 0;
+      z-index: 9999;
+      will-change: transform;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 0;
+      box-sizing: border-box;
+      transition:
+        transform 0.09s ease-out,
+        opacity 0.2s ease,
+        width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.32s ease,
+        padding 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.32s ease,
+        border-color 0.32s ease;
+    }
+
+    #cursor-dot.active {
+      width: 130px;
+      height: 40px;
+      border-radius: 999px;
+      background: rgba(30, 30, 28, 0.85);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      padding: 0 16px;
+    }
+
+    #cursor-dot .cursor-label {
+      color: #f4f1e8;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transform: scale(0.85);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    #cursor-dot.active .cursor-label {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 0.12s;
+    }
+
+    #cursor-dot .cursor-label svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    body.custom-cursor,
+    body.custom-cursor a,
+    body.custom-cursor button {
+      cursor: none;
+    }
+
+    .content p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .content b {
+      font-weight: 700;
+    }
+
+    .content a {
+      color: inherit;
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 2.4em;
+      font-size: 14px;
+      color: #1a1a1a;
+    }
+
+    .portfolio-card {
+      background-color: rgba(245, 244, 240, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 40px 48px;
+      max-width: 780px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-top: 20px;
+    }
+
+    .portfolio-card h2 {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .portfolio-card p {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 28px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .portfolio-box {
+      background-color: #eeecea;
+      border: 1.5px solid #e0dedd;
+      border-radius: 10px;
+      height: 120px;
+    }
+
+    @media (max-width: 600px) {
+      .portfolio-card {
+        padding: 28px 20px;
+        border-radius: 10px;
+      }
+
+      .portfolio-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .portfolio-box {
+        height: 80px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 60px 20px 28px;
+        border-radius: 10px;
+        width: 92%;
+      }
+
+      .card img[src*="BB LOGO2"] {
+        height: 52px;
+        top: 14px;
+        right: 14px;
+      }
+
+      .content {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .footer {
+        font-size: 12px;
+      }
+
+      .loader-logo {
+        width: 90vw;
+        height: 90vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-screen"></div>
+  <div id="floating-logo-wrapper">
+    <img src="Images/123.png" alt="Loading" />
+  </div>
+
+  <div id="cursor-dot">
+    <span class="cursor-label">
+      <span class="cursor-label-text">sukone hong</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+    </span>
+  </div>
+
+<video class="bg-video" autoplay muted loop playsinline>
+    <source src="flora.mp4" type="video/mp4" />
+  </video>
+  <div class="grain"></div>
+
+  <div class="card">
+    <nav class="nav">
+      <a href="investments.html" data-scramble class="cursor-link" data-cursor-label="investments">Investments</a>
+      <a href="essays.html" data-scramble class="cursor-link" data-cursor-label="essays">Essays</a>
+    </nav>
+    <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite; opacity: 0;" />
+<div class="content">
+    </div>
+  </div>
+
+  <script>
+    var CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+=-/\\<>";
+
+    function randChar() {
+      return CHARS[(Math.random() * CHARS.length) | 0];
+    }
+
+    function crackle(el, finalText, duration, changeInterval, delay) {
+      setTimeout(function () {
+        var startTime = null;
+        var lastChange = -Infinity;
+
+        function frame(now) {
+          if (startTime === null) startTime = now;
+          var elapsed = now - startTime;
+
+          if (elapsed >= duration) {
+            el.textContent = finalText;
+            return;
+          }
+
+          if (now - lastChange >= changeInterval) {
+            lastChange = now;
+            var out = "";
+            for (var i = 0; i < finalText.length; i++) {
+              out += finalText[i] === " " ? " " : randChar();
+            }
+            el.textContent = out;
+          }
+
+          requestAnimationFrame(frame);
+        }
+
+        requestAnimationFrame(frame);
+      }, delay || 0);
+    }
+
+    function initScramble() {
+      var targets = document.querySelectorAll('[data-scramble]');
+      var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) return;
+
+      for (var i = 0; i < targets.length; i++) {
+        var el = targets[i];
+        var finalText = el.textContent;
+        el.textContent = finalText.replace(/\S/g, randChar);
+        var duration = el.hasAttribute('data-scramble-duration') ? parseInt(el.getAttribute('data-scramble-duration'), 10) : 700;
+        crackle(el, finalText, duration, 30, i * 70);
+      }
+    }
+
+    (function () {
+      if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
+      var dot = document.getElementById('cursor-dot');
+      if (!dot) return;
+      document.body.classList.add('custom-cursor');
+      window.addEventListener('mousemove', function (e) {
+        dot.style.opacity = '1';
+        dot.style.transform = 'translate(' + e.clientX + 'px, ' + e.clientY + 'px) translate(-50%, -50%)';
+      });
+      window.addEventListener('mouseleave', function () {
+        dot.style.opacity = '0';
+      });
+
+      var CRACKLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#%&*+=-/\\<>";
+      function crackleLabel(el, finalText, duration, changeInterval) {
+        if (el._crackleFrame) cancelAnimationFrame(el._crackleFrame);
+        var startTime = null;
+        var lastChange = -Infinity;
+        function frame(now) {
+          if (startTime === null) startTime = now;
+          var elapsed = now - startTime;
+          if (elapsed >= duration) {
+            el.textContent = finalText;
+            return;
+          }
+          if (now - lastChange >= changeInterval) {
+            lastChange = now;
+            var out = "";
+            for (var i = 0; i < finalText.length; i++) {
+              out += finalText[i] === " " ? " " : CRACKLE_CHARS[(Math.random() * CRACKLE_CHARS.length) | 0];
+            }
+            el.textContent = out;
+          }
+          el._crackleFrame = requestAnimationFrame(frame);
+        }
+        el._crackleFrame = requestAnimationFrame(frame);
+      }
+
+      var labelText = document.querySelector('.cursor-label-text');
+      var cursorLinks = document.querySelectorAll('.cursor-link');
+      cursorLinks.forEach(function (link) {
+        link.addEventListener('mouseenter', function () {
+          if (labelText) crackleLabel(labelText, link.dataset.cursorLabel || '', 260, 30);
+          dot.classList.add('active');
+        });
+        link.addEventListener('mouseleave', function () {
+          dot.classList.remove('active');
+        });
+      });
+    })();
+
+    var wrapper = document.getElementById('floating-logo-wrapper');
+    var loadingScreen = document.getElementById('loading-screen');
+    var mainLogo = document.getElementById('main-logo');
+
+    function centerLogo() {
+      wrapper.style.top = ((window.innerHeight - 220) / 2) + 'px';
+      wrapper.style.left = ((window.innerWidth - 220) / 2) + 'px';
+    }
+    centerLogo();
+    window.addEventListener('resize', centerLogo);
+
+    setTimeout(function() {
+      window.removeEventListener('resize', centerLogo);
+
+      // Make main logo visible but invisible so getBoundingClientRect is accurate
+      mainLogo.style.visibility = 'hidden';
+      mainLogo.style.opacity = '1';
+
+      // Measure exact target rect after a frame so layout is settled
+      requestAnimationFrame(function() {
+        var rect = mainLogo.getBoundingClientRect();
+
+        // Fade out loading background
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.pointerEvents = 'none';
+
+        // Animate floating logo to exact target position and size
+        wrapper.style.transition = [
+          'top 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
+          'left 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
+          'width 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
+          'height 0.75s cubic-bezier(0.4, 0, 0.2, 1)'
+        ].join(', ');
+
+        wrapper.style.top    = rect.top + 'px';
+        wrapper.style.left   = rect.left + 'px';
+        wrapper.style.width  = rect.width + 'px';
+        wrapper.style.height = rect.height + 'px';
+
+        setTimeout(function() {
+          // Swap: hide floating, show real logo
+          mainLogo.style.visibility = '';
+          wrapper.style.display = 'none';
+          loadingScreen.classList.add('hidden');
+
+          initScramble();
+        }, 780);
+      });
+    }, 1800);
+  </script>
+</body>
+</html>
