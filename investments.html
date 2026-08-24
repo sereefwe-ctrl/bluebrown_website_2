@@ -122,35 +122,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
-    #loading-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #000;
-      z-index: 9999;
-      pointer-events: all;
-      transition: opacity 0.5s ease;
-    }
-
-    #loading-screen.hidden {
-      display: none;
-    }
-
-    #floating-logo-wrapper {
-      position: fixed;
-      z-index: 10000;
-      width: 220px;
-      height: 220px;
-      pointer-events: none;
-    }
-
-    #floating-logo-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      animation: spinLogo 8s linear infinite;
-    }
-
     .content-scroll {
       height: 100%;
       overflow-y: auto;
@@ -397,11 +368,6 @@
   </style>
 </head>
 <body>
-  <div id="loading-screen"></div>
-  <div id="floating-logo-wrapper">
-    <img src="Images/123.png" alt="Loading" />
-  </div>
-
   <div id="cursor-dot">
     <span class="cursor-label">
       <span class="cursor-label-text">sukone hong</span>
@@ -422,7 +388,7 @@
       <a href="investments.html" data-scramble class="cursor-link" data-cursor-label="investments">Investments</a>
       <a href="essays.html" data-scramble class="cursor-link" data-cursor-label="essays">Essays</a>
     </nav>
-    <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite; opacity: 0;" />
+    <img id="main-logo" src="Images/123.png" alt="BlueBrown Logo" style="position: absolute; top: 20px; right: 24px; height: 62px; width: auto; animation: spinLogo 8s linear infinite;" />
 <div class="content-scroll">
 <div class="content">
       <p class="invest-sub" data-scramble>portfolio</p>
@@ -558,55 +524,7 @@
       });
     })();
 
-    var wrapper = document.getElementById('floating-logo-wrapper');
-    var loadingScreen = document.getElementById('loading-screen');
-    var mainLogo = document.getElementById('main-logo');
-
-    function centerLogo() {
-      wrapper.style.top = ((window.innerHeight - 220) / 2) + 'px';
-      wrapper.style.left = ((window.innerWidth - 220) / 2) + 'px';
-    }
-    centerLogo();
-    window.addEventListener('resize', centerLogo);
-
-    setTimeout(function() {
-      window.removeEventListener('resize', centerLogo);
-
-      // Make main logo visible but invisible so getBoundingClientRect is accurate
-      mainLogo.style.visibility = 'hidden';
-      mainLogo.style.opacity = '1';
-
-      // Measure exact target rect after a frame so layout is settled
-      requestAnimationFrame(function() {
-        var rect = mainLogo.getBoundingClientRect();
-
-        // Fade out loading background
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.pointerEvents = 'none';
-
-        // Animate floating logo to exact target position and size
-        wrapper.style.transition = [
-          'top 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
-          'left 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
-          'width 0.75s cubic-bezier(0.4, 0, 0.2, 1)',
-          'height 0.75s cubic-bezier(0.4, 0, 0.2, 1)'
-        ].join(', ');
-
-        wrapper.style.top    = rect.top + 'px';
-        wrapper.style.left   = rect.left + 'px';
-        wrapper.style.width  = rect.width + 'px';
-        wrapper.style.height = rect.height + 'px';
-
-        setTimeout(function() {
-          // Swap: hide floating, show real logo
-          mainLogo.style.visibility = '';
-          wrapper.style.display = 'none';
-          loadingScreen.classList.add('hidden');
-
-          initScramble();
-        }, 780);
-      });
-    }, 1800);
+    initScramble();
   </script>
 </body>
 </html>
