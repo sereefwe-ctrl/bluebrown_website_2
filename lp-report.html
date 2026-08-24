@@ -29,10 +29,8 @@
     }
 
     body.unlocked {
-      background: #fafafa;
-      color: #111111;
-      height: auto;
-      overflow: auto;
+      height: 100vh;
+      overflow: hidden;
     }
 
     .bg-video {
@@ -175,108 +173,8 @@
       min-height: 14px;
     }
 
-    /* Plain report layout, matching sukone.com/korea-next-israel.html */
     #plain-report {
       display: none;
-      font-family: "Inter", -apple-system, "system-ui", sans-serif;
-      background: #fafafa;
-      color: #111111;
-      padding: 80px 24px;
-      box-sizing: border-box;
-      min-height: 100vh;
-    }
-
-    #plain-report .container {
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    #plain-report a.back {
-      font-size: 15px;
-      font-weight: 400;
-      line-height: 22.1px;
-      color: #aaaaaa;
-      text-decoration: none;
-    }
-
-    #plain-report h1 {
-      font-size: 40px;
-      font-weight: 600;
-      line-height: 1.3;
-      letter-spacing: normal;
-      color: #1a1a1a;
-      margin: 24px 0 0 0;
-      text-indent: 0;
-    }
-
-    #plain-report p.date {
-      font-size: 12px;
-      font-weight: 400;
-      line-height: 20.4px;
-      color: #aaaaaa;
-      margin: 40px 0 0 0;
-    }
-
-    #plain-report #content h2 {
-      font-size: 22px;
-      font-weight: 600;
-      line-height: 1.3;
-      letter-spacing: -0.28px;
-      color: #111111;
-      margin: 48px 0 16px 0;
-    }
-
-    #plain-report #content h3 {
-      font-size: 17px;
-      font-weight: 600;
-      line-height: 1.3;
-      letter-spacing: -0.28px;
-      color: #111111;
-      margin: 32px 0 16px 0;
-    }
-
-    #plain-report #content p {
-      font-size: 17px;
-      font-weight: 400;
-      line-height: 1.6;
-      color: #444444;
-      margin: 0 0 20px 0;
-    }
-
-    #plain-report #content a {
-      color: #444444;
-    }
-
-    #plain-report #content img {
-      max-width: 100%;
-      height: auto;
-      border-radius: 6px;
-      margin: 8px 0 24px 0;
-      display: block;
-    }
-
-    #plain-report .quote {
-      border-left: 2px solid #e5e5e5;
-      padding-left: 16px;
-      margin: 0 0 24px 0;
-      font-size: 17px;
-      line-height: 1.6;
-      color: #444444;
-      font-style: italic;
-    }
-
-    #plain-report .quote .attr {
-      display: block;
-      margin-top: 8px;
-      font-style: normal;
-      font-size: 13px;
-      color: #999999;
-    }
-
-    #plain-report hr {
-      border: none;
-      border-top: 1px solid #e5e5e5;
-      margin: 32px 0;
     }
   </style>
 </head>
@@ -300,15 +198,7 @@
   </video>
   <div class="grain"></div>
 
-  <div id="plain-report">
-    <div class="container">
-      <a class="back" href="index.html">&larr; back</a>
-      <h1>Q3 2026 LP Report</h1>
-
-      <div id="content">
-      </div>
-    </div>
-  </div>
+  <div id="plain-report"></div>
 
   <script>
     var LP_PASSWORD = '@2026bluebrown';
