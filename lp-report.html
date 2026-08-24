@@ -123,6 +123,11 @@
       transform: translate(-50%, calc(-50% + 23px));
       z-index: 1;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      visibility: hidden;
+    }
+
+    .card.revealed {
+      visibility: visible;
     }
 
     .content-scroll {
@@ -836,6 +841,7 @@
       if (pwInput.value === LP_PASSWORD) {
         gate.classList.add('hidden');
         loadingScreen.classList.add('active');
+        document.querySelector('.card').classList.add('revealed');
         startLoadingSequence();
       } else {
         pwError.textContent = 'incorrect password';
