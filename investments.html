@@ -93,6 +93,15 @@
       background: rgba(255, 255, 255, 0.45);
     }
 
+    .nav-left {
+      position: absolute;
+      top: -46px;
+      left: 0;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+
     .card {
       background-color: rgba(245, 244, 240, 0.65);
       backdrop-filter: blur(8px);
@@ -349,8 +358,10 @@
   <div class="grain"></div>
 
   <div class="card">
-    <nav class="nav">
+    <nav class="nav-left">
       <a href="#" data-scramble class="cursor-link" data-cursor-label="about">About</a>
+    </nav>
+    <nav class="nav">
       <a href="investments.html" data-scramble class="cursor-link" data-cursor-label="investments">Investments</a>
       <a href="essays.html" data-scramble class="cursor-link" data-cursor-label="essays">Essays</a>
     </nav>
