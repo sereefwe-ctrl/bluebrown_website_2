@@ -174,58 +174,86 @@
     }
 
     .password-box {
-      background: rgba(245, 244, 240, 0.9);
+      background: rgba(245, 244, 240, 0.65);
       backdrop-filter: blur(8px);
-      border-radius: 12px;
-      padding: 40px 44px;
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 14px;
+      padding: 44px 40px 38px;
       width: 100%;
-      max-width: 340px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      max-width: 320px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.06);
       text-align: center;
+      box-sizing: border-box;
+    }
+
+    .password-box .lock-icon {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto 16px;
+      opacity: 0.7;
     }
 
     .password-box p {
       font-family: 'Courier New', Courier, monospace;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       color: #1a1a1a;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .password-box input {
       width: 100%;
       font-family: 'Courier New', Courier, monospace;
       font-size: 14px;
-      padding: 10px 12px;
+      padding: 11px 14px;
       border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.55);
       color: #1a1a1a;
       outline: none;
       box-sizing: border-box;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .password-box input::placeholder {
+      color: rgba(26,26,26,0.4);
+    }
+
+    .password-box input:focus {
+      border-color: rgba(26,26,26,0.4);
+      background: rgba(255,255,255,0.8);
     }
 
     .password-box button {
+      width: 100%;
       font-family: 'Courier New', Courier, monospace;
       font-size: 13px;
       font-weight: 700;
-      padding: 8px 18px;
+      letter-spacing: 0.03em;
+      padding: 11px 18px;
       border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.2);
-      background: rgba(30,30,28,0.85);
+      border: none;
+      background: rgba(26,26,26,0.92);
       color: #f4f1e8;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.1s;
     }
 
     .password-box button:hover {
-      background: rgba(30,30,28,1);
+      background: #000;
+    }
+
+    .password-box button:active {
+      transform: scale(0.98);
     }
 
     .password-box .error {
       color: #b33;
       font-size: 12px;
-      margin-top: 10px;
+      margin-top: 12px;
       min-height: 14px;
     }
 
@@ -525,6 +553,10 @@
 <body>
   <div id="password-gate">
     <div class="password-box">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>
+        <path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path>
+      </svg>
       <p>LP Login</p>
       <input type="password" id="password-input" placeholder="enter password" autocomplete="off" />
       <br>
