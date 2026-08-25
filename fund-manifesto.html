@@ -124,15 +124,56 @@
     color: #999999;
   }
 
+  .bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  .grain {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    animation: grain 0.5s steps(1) infinite;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+
+  @keyframes grain {
+    0%  { transform: translate(0, 0); }
+    10% { transform: translate(-2%, -3%); }
+    20% { transform: translate(3%, 2%); }
+    30% { transform: translate(-1%, 4%); }
+    40% { transform: translate(4%, -1%); }
+    50% { transform: translate(-3%, 3%); }
+    60% { transform: translate(2%, -4%); }
+    70% { transform: translate(-4%, 1%); }
+    80% { transform: translate(1%, -2%); }
+    90% { transform: translate(3%, 4%); }
+    100%{ transform: translate(-2%, -1%); }
+  }
+
   #password-gate {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: #fafafa;
+    background: transparent;
     z-index: 20000;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: opacity 0.4s ease;
   }
 
   #password-gate.hidden {
@@ -140,68 +181,86 @@
   }
 
   .password-box {
+    background: rgba(245, 244, 240, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 44px 40px 38px;
     width: 100%;
-    max-width: 280px;
+    max-width: 320px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.28), 0 1px 3px rgba(0,0,0,0.06);
     text-align: center;
+    box-sizing: border-box;
   }
 
   .password-box .lock-icon {
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     margin: 0 auto 16px;
-    opacity: 0.6;
+    opacity: 0.7;
   }
 
   .password-box p {
-    font-size: 12px;
-    font-weight: 500;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #aaaaaa;
-    margin: 0 0 20px 0;
+    color: #1a1a1a;
+    margin-bottom: 20px;
   }
 
   .password-box input {
     width: 100%;
-    font-family: "Inter", -apple-system, "system-ui", sans-serif;
+    font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
-    padding: 10px 12px;
-    border-radius: 6px;
-    border: 1px solid #e5e5e5;
-    background: #ffffff;
-    color: #111111;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.15);
+    background: rgba(255,255,255,0.55);
+    color: #1a1a1a;
     outline: none;
     box-sizing: border-box;
-    margin-bottom: 12px;
-    transition: border-color 0.15s;
+    margin-bottom: 16px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .password-box input::placeholder {
+    color: rgba(26,26,26,0.4);
   }
 
   .password-box input:focus {
-    border-color: #999999;
+    border-color: rgba(26,26,26,0.4);
+    background: rgba(255,255,255,0.8);
   }
 
   .password-box button {
     width: 100%;
-    font-family: "Inter", -apple-system, "system-ui", sans-serif;
+    font-family: 'Courier New', Courier, monospace;
     font-size: 13px;
-    font-weight: 600;
-    padding: 10px 16px;
-    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 11px 18px;
+    border-radius: 8px;
     border: none;
-    background: #1a1a1a;
-    color: #fafafa;
+    background: rgba(26,26,26,0.92);
+    color: #f4f1e8;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.1s;
   }
 
   .password-box button:hover {
-    background: #000000;
+    background: #000;
+  }
+
+  .password-box button:active {
+    transform: scale(0.98);
   }
 
   .password-box .error {
-    color: #c33;
+    color: #b33;
     font-size: 12px;
-    margin-top: 10px;
+    margin-top: 12px;
     min-height: 14px;
   }
 
@@ -221,13 +280,18 @@
         <rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>
         <path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path>
       </svg>
-      <p>Password Required</p>
+      <p>Manifesto Login</p>
       <input type="password" id="password-input" placeholder="enter password" autocomplete="off" />
       <br>
       <button id="password-submit">enter</button>
       <div class="error" id="password-error"></div>
     </div>
   </div>
+
+  <video class="bg-video" autoplay muted loop playsinline>
+    <source src="flora.mp4" type="video/mp4" />
+  </video>
+  <div class="grain"></div>
 
   <div class="container">
     <a class="back" href="essays.html">&larr; back</a>
