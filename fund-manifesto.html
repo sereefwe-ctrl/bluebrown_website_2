@@ -12,7 +12,7 @@
     padding: 0;
     width: 100%;
     min-height: 100%;
-    background: #fafafa;
+    background: #2b2b2b;
     color: #111111;
   }
 
@@ -271,6 +271,15 @@
   .container.revealed {
     visibility: visible;
   }
+
+  body.unlocked {
+    background: #fafafa;
+  }
+
+  body.unlocked .bg-video,
+  body.unlocked .grain {
+    display: none;
+  }
 </style>
 </head>
 <body>
@@ -333,6 +342,7 @@
     function tryUnlock() {
       if (pwInput.value === PASSWORD) {
         gate.classList.add('hidden');
+        document.body.classList.add('unlocked');
         container.classList.add('revealed');
       } else {
         pwError.textContent = 'incorrect password';
