@@ -11,9 +11,16 @@
     margin: 0;
     padding: 0;
     width: 100%;
-    min-height: 100%;
+    height: 100%;
     background: #2b2b2b;
     color: #111111;
+    overflow: hidden;
+  }
+
+  body.unlocked {
+    height: auto;
+    min-height: 100%;
+    overflow: auto;
   }
 
   body {
@@ -332,6 +339,14 @@
   </div>
 
   <script>
+    (function () {
+      var v = document.querySelector('.bg-video');
+      if (v) {
+        v.muted = true;
+        v.play().catch(function () {});
+      }
+    })();
+
     var PASSWORD = '@2026bluebrown';
     var gate = document.getElementById('password-gate');
     var pwInput = document.getElementById('password-input');
