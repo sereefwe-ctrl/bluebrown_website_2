@@ -124,9 +124,111 @@
     color: #999999;
   }
 
+  #password-gate {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #fafafa;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #password-gate.hidden {
+    display: none;
+  }
+
+  .password-box {
+    width: 100%;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .password-box .lock-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0 auto 16px;
+    opacity: 0.6;
+  }
+
+  .password-box p {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #aaaaaa;
+    margin: 0 0 20px 0;
+  }
+
+  .password-box input {
+    width: 100%;
+    font-family: "Inter", -apple-system, "system-ui", sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+    background: #ffffff;
+    color: #111111;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+    transition: border-color 0.15s;
+  }
+
+  .password-box input:focus {
+    border-color: #999999;
+  }
+
+  .password-box button {
+    width: 100%;
+    font-family: "Inter", -apple-system, "system-ui", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #1a1a1a;
+    color: #fafafa;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .password-box button:hover {
+    background: #000000;
+  }
+
+  .password-box .error {
+    color: #c33;
+    font-size: 12px;
+    margin-top: 10px;
+    min-height: 14px;
+  }
+
+  .container {
+    visibility: hidden;
+  }
+
+  .container.revealed {
+    visibility: visible;
+  }
 </style>
 </head>
 <body>
+  <div id="password-gate">
+    <div class="password-box">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect>
+        <path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path>
+      </svg>
+      <p>Password Required</p>
+      <input type="password" id="password-input" placeholder="enter password" autocomplete="off" />
+      <br>
+      <button id="password-submit">enter</button>
+      <div class="error" id="password-error"></div>
+    </div>
+  </div>
+
   <div class="container">
     <a class="back" href="essays.html">&larr; back</a>
     <h1>Fund Manifesto</h1>
@@ -155,5 +257,29 @@
       <p>Placeholder closing paragraph. This is where the manifesto would end with a statement of intent for the years ahead.</p>
     </div>
   </div>
+
+  <script>
+    var PASSWORD = '@2026bluebrown';
+    var gate = document.getElementById('password-gate');
+    var pwInput = document.getElementById('password-input');
+    var pwSubmit = document.getElementById('password-submit');
+    var pwError = document.getElementById('password-error');
+    var container = document.querySelector('.container');
+
+    function tryUnlock() {
+      if (pwInput.value === PASSWORD) {
+        gate.classList.add('hidden');
+        container.classList.add('revealed');
+      } else {
+        pwError.textContent = 'incorrect password';
+        pwInput.value = '';
+      }
+    }
+
+    pwSubmit.addEventListener('click', tryUnlock);
+    pwInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') tryUnlock();
+    });
+  </script>
 </body>
 </html>
