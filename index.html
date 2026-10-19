@@ -45,6 +45,18 @@
       background-size: 200px 200px;
     }
 
+    .center-logo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(560px, 72vw);
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
     @keyframes grain {
       0%  { transform: translate(0, 0); }
       10% { transform: translate(-2%, -3%); }
@@ -65,5 +77,6 @@
     <source src="flora.mp4" type="video/mp4" />
   </video>
   <div class="grain"></div>
+  <img class="center-logo" src="Images/stealth-fund-wordmark.png" alt="Stealth Fund" />
 </body>
 </html>
