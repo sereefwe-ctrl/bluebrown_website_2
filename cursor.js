@@ -1,11 +1,11 @@
 /*
  * Custom cursor + square-dot trail, shared by every page.
  *
- * Cursor: an 11px white rounded square with mix-blend-mode: exclusion
+ * Cursor: an 18px white rounded square with mix-blend-mode: exclusion
  * (the Moto Studios style). Over a link it slides out a coloured label
  * tag to its left, showing the link's data-cursor-label (or its text).
  *
- * Trail: tiny squares snapped to a 6px pixel grid fall off the cursor,
+ * Trail: small squares snapped to a 10px pixel grid fall off the cursor,
  * shrink in hard pixel steps and drift. Faster movement leaves more,
  * brighter dots. Clicking releases a ring of squares that expand
  * outwards on the same grid.
@@ -14,20 +14,21 @@
   if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var GRID = 6;
+  var GRID = 10;
+  var SIZE = 18;
   var TAG_COLORS = ['#ffc857', '#9fb4e6', '#f4f1e8', '#e8a27c'];
   var DOT_COLORS = ['#ffffff', '#ffc857', '#9fb4e6', '#f4f1e8'];
 
   var css = [
     'html.bb-cursor, html.bb-cursor * { cursor: none !important; }',
-    '.bb-cursor-el { position: fixed; top: 0; left: 0; width: 11px; height: 11px; z-index: 100000; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; will-change: transform; }',
+    '.bb-cursor-el { position: fixed; top: 0; left: 0; width: 18px; height: 18px; z-index: 100000; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; will-change: transform; }',
     '.bb-cursor-el.is-visible { opacity: 1; }',
-    '.bb-cursor-dot { position: fixed; top: 0; left: 0; width: 11px; height: 11px; z-index: 100001; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; mix-blend-mode: exclusion; will-change: transform; }',
+    '.bb-cursor-dot { position: fixed; top: 0; left: 0; width: 18px; height: 18px; z-index: 100001; pointer-events: none; opacity: 0; transition: opacity 0.2s ease; mix-blend-mode: exclusion; will-change: transform; }',
     '.bb-cursor-dot.is-visible { opacity: 1; }',
-    '.bb-cursor-dot span { position: absolute; inset: 0; background: #fff; border-radius: 3px; transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }',
+    '.bb-cursor-dot span { position: absolute; inset: 0; background: #fff; border-radius: 5px; transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1); }',
     '.bb-cursor-dot.is-down span { transform: scale(0.6); }',
-    '.bb-cursor-tag { position: absolute; top: 50%; right: 15px; margin-top: -0.85em; padding: 3px 0; overflow: hidden; white-space: nowrap; text-align: center; width: 0; opacity: 0;',
-    '  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12.5px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; color: #090909;',
+    '.bb-cursor-tag { position: absolute; top: 50%; right: 26px; margin-top: -0.85em; padding: 5px 0; overflow: hidden; white-space: nowrap; text-align: center; width: 0; opacity: 0;',
+    '  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; color: #090909;',
     '  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, background-color 0.2s ease; }',
     '.bb-cursor-el.is-tagged .bb-cursor-tag { opacity: 1; }',
     '.bb-cursor-word { display: inline-block; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1); }',
@@ -110,7 +111,7 @@
     ruler.textContent = label;
     word.textContent = label;
     tag.style.backgroundColor = TAG_COLORS[colorIndex++ % TAG_COLORS.length];
-    tag.style.width = (ruler.offsetWidth + 16) + 'px';
+    tag.style.width = (ruler.offsetWidth + 22) + 'px';
     el.classList.add('is-tagged');
   }
   function hideTag() {
@@ -128,7 +129,7 @@
 
   // Trail particles: grid-snapped squares that shrink in pixel steps.
   var particles = [];
-  var MAX_PARTICLES = 260;
+  var MAX_PARTICLES = 320;
 
   function snap(v) { return Math.round(v / GRID) * GRID; }
 
@@ -148,20 +149,20 @@
       var t = i / steps;
       var px = snap(lastSpawnX + dx * t + (Math.random() - 0.5) * GRID * 2);
       var py = snap(lastSpawnY + dy * t + (Math.random() - 0.5) * GRID * 2);
-      var size = Math.random() < 0.25 + speed * 0.4 ? 4 : 2;
+      var size = Math.random() < 0.25 + speed * 0.4 ? 8 : 5;
       var color = Math.random() < 0.7 ? DOT_COLORS[0] : DOT_COLORS[1 + ((Math.random() * 3) | 0)];
-      addParticle(px, py, -dx / dist * 0.15 + (Math.random() - 0.5) * 0.2, 0.12 + Math.random() * 0.25, size, 520 + Math.random() * 420, color);
+      addParticle(px, py, -dx / dist * 0.25 + (Math.random() - 0.5) * 0.35, 0.2 + Math.random() * 0.4, size, 650 + Math.random() * 500, color);
     }
     lastSpawnX = mouseX;
     lastSpawnY = mouseY;
   }
 
   function burst(x, y) {
-    var count = 20;
+    var count = 24;
     for (var i = 0; i < count; i++) {
       var a = (i / count) * Math.PI * 2;
-      var sp = 2.2 + Math.random() * 1.6;
-      addParticle(snap(x), snap(y), Math.cos(a) * sp, Math.sin(a) * sp, 4, 650 + Math.random() * 250, DOT_COLORS[i % DOT_COLORS.length]);
+      var sp = 3.6 + Math.random() * 2.4;
+      addParticle(snap(x), snap(y), Math.cos(a) * sp, Math.sin(a) * sp, 9, 750 + Math.random() * 300, DOT_COLORS[i % DOT_COLORS.length]);
     }
   }
 
@@ -172,7 +173,7 @@
 
     curX += (mouseX - curX) * 0.35;
     curY += (mouseY - curY) * 0.35;
-    var t = 'translate(' + (curX - 5.5) + 'px, ' + (curY - 5.5) + 'px)';
+    var t = 'translate(' + (curX - SIZE / 2) + 'px, ' + (curY - SIZE / 2) + 'px)';
     el.style.transform = t;
     dot.style.transform = t;
 
