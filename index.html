@@ -115,6 +115,31 @@
       justify-content: center;
     }
 
+    /* The painting fills the panel behind the logo, with a soft shade at
+       the bottom so the fine print stays readable. */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent 40%, rgba(0, 0, 0, 0.35));
+    }
+
+    .hero-logo,
+    .legal {
+      z-index: 1;
+    }
+
     /* Star mark + wordmark, laid out with the original logo's proportions
        (star 194px, gap 55px, text 923px of 1172px). */
     .hero-logo {
@@ -150,7 +175,7 @@
       line-height: 1.6;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: rgba(244, 241, 232, 0.4);
+      color: rgba(244, 241, 232, 0.6);
     }
 
     /* Live film grain, redrawn by the script below. */
@@ -176,6 +201,7 @@
 
   <main>
     <section class="tile hero">
+      <img class="hero-bg" src="stealth/night-pines.jpg" alt="" />
       <div class="hero-logo" role="img" aria-label="Stealth Fund">
         <img class="logo-star" src="stealth/logo-star.png" alt="" />
         <img class="logo-text" src="stealth/logo-text.png" alt="" />
