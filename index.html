@@ -139,6 +139,20 @@
       width: 78.75%;
     }
 
+    /* Fine print in the panel's bottom-left corner, set like the Stealth
+       Fund site's: small spaced capitals in a muted cream. */
+    .legal {
+      position: absolute;
+      left: clamp(16px, 2.2vw, 40px);
+      bottom: clamp(16px, 2vw, 36px);
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: max(10px, 0.82vw);
+      line-height: 1.6;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(244, 241, 232, 0.4);
+    }
+
     /* Live film grain, redrawn by the script below. */
     .grain {
       position: fixed;
@@ -166,6 +180,7 @@
         <img class="logo-star" src="stealth/logo-star.png" alt="" />
         <img class="logo-text" src="stealth/logo-text.png" alt="" />
       </div>
+      <p class="legal">© 2026 BlueBrown Partners LLC. All rights reserved.<br />Stealth Fund™ is a trademark of its respective owner.</p>
     </section>
   </main>
 
