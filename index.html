@@ -6,78 +6,224 @@
   <title>BlueBrown Partners</title>
   <link rel="icon" type="image/png" href="Images/123.png" />
   <style>
+    /* The Stealth Fund hero, on its own: one rounded glass panel filling
+       the screen with the logo in the middle, over slow coloured light
+       and live film grain. */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    body {
-      background-color: #2b2b2b;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
+    :root {
+      --gap: clamp(14px, 2.2vw, 44px);
+      --radius: clamp(14px, 1.4vw, 28px);
     }
 
-    .bg-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
+    html, body {
       height: 100%;
-      object-fit: cover;
+    }
+
+    body {
+      background-color: #0e0e0d;
+      overflow: hidden;
+    }
+
+    /* Slow-moving light behind the glass so the panel has something to blur. */
+    .ambient {
+      position: fixed;
+      inset: 0;
       z-index: -1;
-      opacity: 0.5;
+      overflow: hidden;
+      pointer-events: none;
     }
 
-    .grain {
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.08;
-      animation: grain 0.5s steps(1) infinite;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      background-repeat: repeat;
-      background-size: 200px 200px;
+    .ambient span {
+      position: absolute;
+      width: 70vmax;
+      height: 70vmax;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.55;
+      will-change: transform;
     }
 
-    .center-logo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: min(640px, 80vw);
-      height: auto;
-      z-index: 1;
+    .ambient .a {
+      top: -25vmax;
+      left: -20vmax;
+      background: radial-gradient(circle, rgba(159, 180, 230, 0.32), transparent 65%);
+      animation: drift-a 38s ease-in-out infinite alternate;
+    }
+
+    .ambient .b {
+      bottom: -30vmax;
+      right: -25vmax;
+      background: radial-gradient(circle, rgba(232, 162, 124, 0.26), transparent 65%);
+      animation: drift-b 46s ease-in-out infinite alternate;
+    }
+
+    .ambient .c {
+      top: 30%;
+      left: 35%;
+      width: 45vmax;
+      height: 45vmax;
+      background: radial-gradient(circle, rgba(255, 200, 87, 0.12), transparent 65%);
+      animation: drift-c 54s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift-a { to { transform: translate(30vw, 25vh) scale(1.15); } }
+    @keyframes drift-b { to { transform: translate(-35vw, -30vh) scale(0.9); } }
+    @keyframes drift-c { to { transform: translate(-25vw, 20vh) scale(1.3); } }
+
+    main {
+      padding: var(--gap);
+    }
+
+    /* Frosted-glass panel with a soft highlight that follows the pointer. */
+    .tile {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015) 55%, rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 30px 60px -40px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(28px) saturate(140%);
+      -webkit-backdrop-filter: blur(28px) saturate(140%);
+    }
+
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
       pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.08), transparent 60%);
+    }
+
+    .tile:hover::before {
+      opacity: 1;
+    }
+
+    .hero {
+      height: calc(100vh - 2 * var(--gap));
+      height: calc(100svh - 2 * var(--gap));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Star mark + wordmark, laid out with the original logo's proportions
+       (star 194px, gap 55px, text 923px of 1172px). */
+    .hero-logo {
+      position: relative;
+      width: min(640px, 70%);
+      display: flex;
+      align-items: center;
+      gap: 4.69%;
       user-select: none;
     }
 
-    @keyframes grain {
-      0%  { transform: translate(0, 0); }
-      10% { transform: translate(-2%, -3%); }
-      20% { transform: translate(3%, 2%); }
-      30% { transform: translate(-1%, 4%); }
-      40% { transform: translate(4%, -1%); }
-      50% { transform: translate(-3%, 3%); }
-      60% { transform: translate(2%, -4%); }
-      70% { transform: translate(-4%, 1%); }
-      80% { transform: translate(1%, -2%); }
-      90% { transform: translate(3%, 4%); }
-      100%{ transform: translate(-2%, -1%); }
+    .hero-logo img {
+      display: block;
+      height: auto;
+    }
+
+    .logo-star {
+      width: 16.55%;
+    }
+
+    .logo-text {
+      width: 78.75%;
+    }
+
+    /* Live film grain, redrawn by the script below. */
+    .grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.11;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ambient span {
+        animation: none;
+      }
     }
   </style>
 </head>
 <body>
-  <video class="bg-video" autoplay muted loop playsinline>
-    <source src="flora.mp4" type="video/mp4" />
-  </video>
-  <div class="grain"></div>
-  <img class="center-logo" src="Images/stealth-fund-wordmark.png" alt="Stealth Fund" />
+  <div class="ambient" aria-hidden="true"><span class="a"></span><span class="b"></span><span class="c"></span></div>
+
+  <main>
+    <section class="tile hero">
+      <div class="hero-logo" role="img" aria-label="Stealth Fund">
+        <img class="logo-star" src="stealth/logo-star.png" alt="" />
+        <img class="logo-text" src="stealth/logo-text.png" alt="" />
+      </div>
+    </section>
+  </main>
+
+  <canvas class="grain" aria-hidden="true"></canvas>
+
+  <script>
+    // Live film grain: a few pre-rendered noise tiles, shown at a random
+    // offset ~14 times a second so the grain flickers like film.
+    (function () {
+      var canvas = document.querySelector('.grain');
+      var ctx = canvas.getContext('2d');
+      var TILE = 180;
+      var tiles = [];
+
+      for (var t = 0; t < 6; t++) {
+        var c = document.createElement('canvas');
+        c.width = c.height = TILE;
+        var cx = c.getContext('2d');
+        var img = cx.createImageData(TILE, TILE);
+        for (var i = 0; i < img.data.length; i += 4) {
+          var v = (Math.random() * 255) | 0;
+          img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+          img.data[i + 3] = 255;
+        }
+        cx.putImageData(img, 0, 0);
+        tiles.push(ctx.createPattern(c, 'repeat'));
+      }
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+      }
+
+      function draw() {
+        var p = tiles[(Math.random() * tiles.length) | 0];
+        var ox = (Math.random() * TILE) | 0, oy = (Math.random() * TILE) | 0;
+        ctx.setTransform(1, 0, 0, 1, -ox, -oy);
+        ctx.fillStyle = p;
+        ctx.fillRect(ox, oy, canvas.width, canvas.height);
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      setInterval(draw, 70);
+    })();
+
+    // Pointer-following highlight on the glass panel.
+    document.querySelectorAll('.tile').forEach(function (tile) {
+      tile.addEventListener('mousemove', function (e) {
+        var r = tile.getBoundingClientRect();
+        tile.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        tile.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  </script>
   <script src="/cursor.js"></script>
 </body>
 </html>
