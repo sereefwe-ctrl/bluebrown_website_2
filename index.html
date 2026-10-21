@@ -201,6 +201,50 @@
       transform: none;
     }
 
+    .gate-card {
+      position: relative;
+    }
+
+    /* Back button in the card's top-left corner: the site's curved-barb
+       arrow, pointing left, in a small glass square. */
+    .gate-back {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: grid;
+      place-items: center;
+      width: 38px;
+      aspect-ratio: 1;
+      padding: 0;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(244, 241, 232, 0.85);
+      cursor: pointer;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    .gate-back svg {
+      width: 18px;
+      height: auto;
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gate-back:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.22);
+      color: #f4f1e8;
+    }
+
+    .gate-back:hover svg {
+      transform: translateX(-3px);
+    }
+
+    .gate-back:focus-visible {
+      outline: 2px solid rgba(244, 241, 232, 0.6);
+      outline-offset: 3px;
+    }
+
     .gate-card.is-wrong {
       animation: gate-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
     }
@@ -361,6 +405,9 @@
 
   <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy">
     <div class="gate-card">
+      <button class="gate-back" type="button" aria-label="Go back" data-cursor-label="back">
+        <svg viewBox="0 0 46 32" fill="none" stroke="currentColor" stroke-width="3.6" aria-hidden="true"><path d="M2 16H46"></path><path d="M16 0C16 9 10 16 2 16C10 16 16 23 16 32"></path></svg>
+      </button>
       <div class="gate-logo" role="img" aria-label="Stealth Fund">
         <img class="logo-star" src="stealth/logo-star.png" alt="" />
         <img class="logo-text" src="stealth/logo-text.png" alt="" />
@@ -422,23 +469,23 @@
       setInterval(draw, 70);
     })();
 
-    // Access gate: scrolling down on the home screen opens it, and scrolling
-    // either way while it is open closes it again, back and forth for as
-    // long as you like (wheel, swipe or keys; each gesture counts once, so
-    // a trackpad's coasting doesn't flip it twice). Escape or a click
-    // outside the card also closes it. The code is checked
+    // Access gate: it slides in 2.5 seconds after the home screen shows,
+    // and the back button in its corner is the only way out; back on the
+    // home screen, it returns 2.5 seconds later. The code is checked
     // against its SHA-256 hash, so it is not written into the page; a
     // correct code goes on to the full Stealth Fund site.
     (function () {
       var CODE_HASH = '9ef3dcb6596b7d606b713995e48696d89da3c01f4300563f85d15e20a2541a4e';
       var UNLOCK_URL = 'https://stealth-fund.vercel.app/';
+      var DELAY = 2500;
       var gate = document.querySelector('.gate');
       var card = gate.querySelector('.gate-card');
       var form = gate.querySelector('.gate-form');
       var input = gate.querySelector('.gate-input');
       var button = gate.querySelector('.gate-button');
+      var back = gate.querySelector('.gate-back');
       var error = gate.querySelector('.gate-error');
-      var busy = false;
+      var busy = false, timer = null;
 
       function open() {
         if (gate.classList.contains('is-open')) return;
@@ -447,65 +494,24 @@
       }
 
       function close() {
-        if (!gate.classList.contains('is-open')) return;
         gate.classList.remove('is-open');
         input.blur();
         input.value = '';
         error.textContent = '';
         card.classList.remove('is-wrong');
+        later();
       }
 
-      function isOpen() {
-        return gate.classList.contains('is-open');
+      function later() {
+        clearTimeout(timer);
+        timer = setTimeout(open, DELAY);
       }
 
-      // One scroll gesture (direction > 0 = down) flips the gate once.
-      function scrolled(direction) {
-        if (isOpen()) close();
-        else if (direction > 0) open();
-        else return false;
-        return true;
-      }
-
-      // Wheel events less than 220ms apart belong to the same gesture.
-      var lastWheel = 0, wheelDone = false;
-      window.addEventListener('wheel', function (e) {
-        var now = performance.now();
-        if (now - lastWheel > 220) wheelDone = false;
-        lastWheel = now;
-        if (wheelDone || Math.abs(e.deltaY) < 4 || busy) return;
-        wheelDone = scrolled(e.deltaY);
-      }, { passive: true });
-
-      var touchY = null, touchDone = false;
-      window.addEventListener('touchstart', function (e) {
-        touchY = e.touches[0].clientY;
-        touchDone = false;
-      }, { passive: true });
-      window.addEventListener('touchmove', function (e) {
-        if (touchDone || touchY === null || busy) return;
-        var dy = touchY - e.touches[0].clientY;
-        if (Math.abs(dy) > 24) touchDone = scrolled(dy);
-      }, { passive: true });
-
-      window.addEventListener('keydown', function (e) {
-        if (busy) return;
-        if (isOpen()) {
-          if (['Escape', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown'].indexOf(e.key) !== -1) {
-            e.preventDefault();
-            close();
-          }
-          return;
-        }
-        if (['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'].indexOf(e.key) !== -1) {
-          e.preventDefault();
-          open();
-        }
+      back.addEventListener('click', function () {
+        if (!busy) close();
       });
 
-      gate.addEventListener('mousedown', function (e) {
-        if (e.target === gate) close();
-      });
+      later();
 
       function sha256(text) {
         return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
