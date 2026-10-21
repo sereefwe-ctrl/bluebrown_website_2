@@ -201,43 +201,47 @@
       transform: none;
     }
 
-    .gate-card {
-      position: relative;
+    /* Back arrow just above the card, on its left edge: the site's
+       curved-barb arrow pointing left, bare (no box). */
+    .gate-stack {
+      width: min(400px, 100%);
     }
 
-    /* Back button in the card's top-left corner: the site's curved-barb
-       arrow, pointing left, in a small glass square. */
+    .gate-stack .gate-card {
+      width: 100%;
+    }
+
     .gate-back {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      display: grid;
+      display: inline-grid;
       place-items: center;
-      width: 38px;
-      aspect-ratio: 1;
-      padding: 0;
-      border-radius: 11px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(255, 255, 255, 0.05);
-      color: rgba(244, 241, 232, 0.85);
+      margin: 0 0 14px 2px;
+      padding: 6px 4px;
+      border: 0;
+      background: none;
+      color: rgba(244, 241, 232, 0.8);
       cursor: pointer;
-      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+      opacity: 0;
+      translate: 0 8px;
+      transition: color 0.25s ease, opacity 0.5s ease 0.15s, translate 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+    }
+
+    .gate.is-open .gate-back {
+      opacity: 1;
+      translate: 0 0;
     }
 
     .gate-back svg {
-      width: 18px;
+      width: 30px;
       height: auto;
       transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .gate-back:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.22);
       color: #f4f1e8;
     }
 
     .gate-back:hover svg {
-      transform: translateX(-3px);
+      transform: translateX(-4px);
     }
 
     .gate-back:focus-visible {
@@ -404,10 +408,11 @@
   </main>
 
   <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy">
+    <div class="gate-stack">
+    <button class="gate-back" type="button" aria-label="Go back" data-cursor-label="back">
+      <svg viewBox="0 0 46 32" fill="none" stroke="currentColor" stroke-width="3.6" aria-hidden="true"><path d="M2 16H46"></path><path d="M16 0C16 9 10 16 2 16C10 16 16 23 16 32"></path></svg>
+    </button>
     <div class="gate-card">
-      <button class="gate-back" type="button" aria-label="Go back" data-cursor-label="back">
-        <svg viewBox="0 0 46 32" fill="none" stroke="currentColor" stroke-width="3.6" aria-hidden="true"><path d="M2 16H46"></path><path d="M16 0C16 9 10 16 2 16C10 16 16 23 16 32"></path></svg>
-      </button>
       <div class="gate-logo" role="img" aria-label="Stealth Fund">
         <img class="logo-star" src="stealth/logo-star.png" alt="" />
         <img class="logo-text" src="stealth/logo-text.png" alt="" />
@@ -420,6 +425,7 @@
         <button class="gate-button" type="submit" data-cursor-label="access">Access</button>
         <p class="gate-error" role="alert"></p>
       </form>
+    </div>
     </div>
   </div>
 
@@ -469,15 +475,15 @@
       setInterval(draw, 70);
     })();
 
-    // Access gate: it slides in 2.5 seconds after the home screen shows,
-    // and the back button in its corner is the only way out; back on the
-    // home screen, it returns 2.5 seconds later. The code is checked
+    // Access gate: it slides in 1.5 seconds after the home screen shows,
+    // and the back arrow above it is the only way out; back on the home
+    // screen, it returns 1.5 seconds later. The code is checked
     // against its SHA-256 hash, so it is not written into the page; a
     // correct code goes on to the full Stealth Fund site.
     (function () {
       var CODE_HASH = '9ef3dcb6596b7d606b713995e48696d89da3c01f4300563f85d15e20a2541a4e';
       var UNLOCK_URL = 'https://stealth-fund.vercel.app/';
-      var DELAY = 2500;
+      var DELAY = 1500;
       var gate = document.querySelector('.gate');
       var card = gate.querySelector('.gate-card');
       var form = gate.querySelector('.gate-form');
