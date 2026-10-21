@@ -366,7 +366,7 @@
         <img class="logo-text" src="stealth/logo-text.png" alt="" />
       </div>
       <h2 class="gate-title" id="gate-title">Access Restricted</h2>
-      <p class="gate-copy" id="gate-copy">To gain access to this doc, provide your access code below.</p>
+      <p class="gate-copy" id="gate-copy">To gain access to this doc,<br />provide your access code below.</p>
       <form class="gate-form" novalidate>
         <label class="gate-label" for="gate-code">Enter access code</label>
         <input class="gate-input" id="gate-code" type="password" placeholder="Your access code..." autocomplete="off" spellcheck="false" />
@@ -422,8 +422,11 @@
       setInterval(draw, 70);
     })();
 
-    // Access gate: any attempt to scroll down (wheel, swipe or keys) opens
-    // it; Escape or a click outside the card closes it. The code is checked
+    // Access gate: scrolling down on the home screen opens it, and scrolling
+    // either way while it is open closes it again, back and forth for as
+    // long as you like (wheel, swipe or keys; each gesture counts once, so
+    // a trackpad's coasting doesn't flip it twice). Escape or a click
+    // outside the card also closes it. The code is checked
     // against its SHA-256 hash, so it is not written into the page; a
     // correct code goes on to the full Stealth Fund site.
     (function () {
@@ -444,25 +447,54 @@
       }
 
       function close() {
+        if (!gate.classList.contains('is-open')) return;
         gate.classList.remove('is-open');
         input.blur();
+        input.value = '';
+        error.textContent = '';
+        card.classList.remove('is-wrong');
       }
 
+      function isOpen() {
+        return gate.classList.contains('is-open');
+      }
+
+      // One scroll gesture (direction > 0 = down) flips the gate once.
+      function scrolled(direction) {
+        if (isOpen()) close();
+        else if (direction > 0) open();
+        else return false;
+        return true;
+      }
+
+      // Wheel events less than 220ms apart belong to the same gesture.
+      var lastWheel = 0, wheelDone = false;
       window.addEventListener('wheel', function (e) {
-        if (e.deltaY > 4) open();
+        var now = performance.now();
+        if (now - lastWheel > 220) wheelDone = false;
+        lastWheel = now;
+        if (wheelDone || Math.abs(e.deltaY) < 4 || busy) return;
+        wheelDone = scrolled(e.deltaY);
       }, { passive: true });
 
-      var touchY = null;
+      var touchY = null, touchDone = false;
       window.addEventListener('touchstart', function (e) {
         touchY = e.touches[0].clientY;
+        touchDone = false;
       }, { passive: true });
       window.addEventListener('touchmove', function (e) {
-        if (touchY !== null && touchY - e.touches[0].clientY > 24) { open(); touchY = null; }
+        if (touchDone || touchY === null || busy) return;
+        var dy = touchY - e.touches[0].clientY;
+        if (Math.abs(dy) > 24) touchDone = scrolled(dy);
       }, { passive: true });
 
       window.addEventListener('keydown', function (e) {
-        if (gate.classList.contains('is-open')) {
-          if (e.key === 'Escape') close();
+        if (busy) return;
+        if (isOpen()) {
+          if (['Escape', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown'].indexOf(e.key) !== -1) {
+            e.preventDefault();
+            close();
+          }
           return;
         }
         if (['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'].indexOf(e.key) !== -1) {
