@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BlueBrown Partners</title>
   <link rel="icon" type="image/png" href="Images/123.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet" />
   <style>
     /* The Stealth Fund hero, on its own: one rounded glass panel filling
        the screen with the logo in the middle, over slow coloured light
@@ -153,6 +156,172 @@
       color: rgba(244, 241, 232, 0.4);
     }
 
+    /* Access gate: opens when someone tries to scroll past the hero. A
+       dark frosted card over a blurred backdrop, with the Stealth Fund
+       mark, a code field and a soft cream button, in the hero's palette. */
+    .gate {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      padding: var(--gap);
+      background: rgba(8, 8, 8, 0.45);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+    }
+
+    .gate.is-open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.45s ease;
+    }
+
+    .gate-card {
+      width: min(400px, 100%);
+      padding: clamp(28px, 3vw, 40px);
+      border-radius: calc(var(--radius) * 1.1);
+      background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03) 55%, rgba(255, 255, 255, 0.05)),
+        rgba(22, 22, 21, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 40px 80px -30px rgba(0, 0, 0, 0.85);
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .gate.is-open .gate-card {
+      transform: none;
+    }
+
+    .gate-card.is-wrong {
+      animation: gate-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+
+    @keyframes gate-shake {
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(7px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(3px); }
+    }
+
+    /* Same star + wordmark proportions as the hero logo. */
+    .gate-logo {
+      display: flex;
+      align-items: center;
+      gap: 4.69%;
+      width: 172px;
+      margin: 0 auto 26px;
+    }
+
+    .gate-logo img {
+      display: block;
+      height: auto;
+    }
+
+    .gate-logo .logo-star { width: 16.55%; }
+    .gate-logo .logo-text { width: 78.75%; }
+
+    .gate-title {
+      font-family: 'Newsreader', 'Times New Roman', serif;
+      font-weight: 400;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: rgba(244, 241, 232, 0.96);
+    }
+
+    .gate-copy {
+      margin-top: 10px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: rgba(244, 241, 232, 0.55);
+    }
+
+    .gate-form {
+      margin-top: 28px;
+      text-align: left;
+    }
+
+    .gate-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(244, 241, 232, 0.8);
+    }
+
+    .gate-input {
+      display: block;
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      font: inherit;
+      font-size: 15px;
+      color: rgba(244, 241, 232, 0.96);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .gate-input::placeholder {
+      color: rgba(244, 241, 232, 0.35);
+    }
+
+    .gate-input:focus {
+      border-color: rgba(244, 241, 232, 0.45);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 0 3px rgba(244, 241, 232, 0.08);
+    }
+
+    .gate-card.is-wrong .gate-input {
+      border-color: rgba(232, 162, 124, 0.7);
+    }
+
+    .gate-button {
+      display: block;
+      width: 100%;
+      height: 48px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 12px;
+      background: #d9d5cc;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      color: #0e0e0d;
+      cursor: pointer;
+      transition: background-color 0.25s ease, transform 0.15s ease;
+    }
+
+    .gate-button:hover { background: #e8e4db; }
+    .gate-button:active { transform: scale(0.99); }
+
+    .gate-button:focus-visible {
+      outline: 2px solid rgba(244, 241, 232, 0.6);
+      outline-offset: 3px;
+    }
+
+    .gate-card.is-granted .gate-button {
+      background: #f4f1e8;
+    }
+
+    .gate-error {
+      min-height: 18px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #e8a27c;
+    }
+
     /* Live film grain, redrawn by the script below. */
     .grain {
       position: fixed;
@@ -165,8 +334,14 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ambient span {
+      .ambient span,
+      .gate-card.is-wrong {
         animation: none;
+      }
+
+      .gate,
+      .gate-card {
+        transition: none;
       }
     }
   </style>
@@ -183,6 +358,23 @@
       <p class="legal">© 2026 BlueBrown Partners LLC. All rights reserved.<br />Stealth Fund™ is a trademark of its respective owner.</p>
     </section>
   </main>
+
+  <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy">
+    <div class="gate-card">
+      <div class="gate-logo" role="img" aria-label="Stealth Fund">
+        <img class="logo-star" src="stealth/logo-star.png" alt="" />
+        <img class="logo-text" src="stealth/logo-text.png" alt="" />
+      </div>
+      <h2 class="gate-title" id="gate-title">Access Restricted</h2>
+      <p class="gate-copy" id="gate-copy">To gain access to this doc, provide your access code below.</p>
+      <form class="gate-form" novalidate>
+        <label class="gate-label" for="gate-code">Enter access code</label>
+        <input class="gate-input" id="gate-code" type="password" placeholder="Your access code..." autocomplete="off" spellcheck="false" />
+        <button class="gate-button" type="submit" data-cursor-label="access">Access</button>
+        <p class="gate-error" role="alert"></p>
+      </form>
+    </div>
+  </div>
 
   <canvas class="grain" aria-hidden="true"></canvas>
 
@@ -228,6 +420,96 @@
 
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       setInterval(draw, 70);
+    })();
+
+    // Access gate: any attempt to scroll down (wheel, swipe or keys) opens
+    // it; Escape or a click outside the card closes it. The code is checked
+    // against its SHA-256 hash, so it is not written into the page; a
+    // correct code goes on to the full Stealth Fund site.
+    (function () {
+      var CODE_HASH = '9ef3dcb6596b7d606b713995e48696d89da3c01f4300563f85d15e20a2541a4e';
+      var UNLOCK_URL = 'https://stealth-fund.vercel.app/';
+      var gate = document.querySelector('.gate');
+      var card = gate.querySelector('.gate-card');
+      var form = gate.querySelector('.gate-form');
+      var input = gate.querySelector('.gate-input');
+      var button = gate.querySelector('.gate-button');
+      var error = gate.querySelector('.gate-error');
+      var busy = false;
+
+      function open() {
+        if (gate.classList.contains('is-open')) return;
+        gate.classList.add('is-open');
+        setTimeout(function () { input.focus({ preventScroll: true }); }, 60);
+      }
+
+      function close() {
+        gate.classList.remove('is-open');
+        input.blur();
+      }
+
+      window.addEventListener('wheel', function (e) {
+        if (e.deltaY > 4) open();
+      }, { passive: true });
+
+      var touchY = null;
+      window.addEventListener('touchstart', function (e) {
+        touchY = e.touches[0].clientY;
+      }, { passive: true });
+      window.addEventListener('touchmove', function (e) {
+        if (touchY !== null && touchY - e.touches[0].clientY > 24) { open(); touchY = null; }
+      }, { passive: true });
+
+      window.addEventListener('keydown', function (e) {
+        if (gate.classList.contains('is-open')) {
+          if (e.key === 'Escape') close();
+          return;
+        }
+        if (['ArrowDown', 'PageDown', 'End', ' ', 'Spacebar'].indexOf(e.key) !== -1) {
+          e.preventDefault();
+          open();
+        }
+      });
+
+      gate.addEventListener('mousedown', function (e) {
+        if (e.target === gate) close();
+      });
+
+      function sha256(text) {
+        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
+          return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+            return ('0' + b.toString(16)).slice(-2);
+          }).join('');
+        });
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (busy) return;
+        var value = input.value.trim();
+        if (!value) { input.focus(); return; }
+        busy = true;
+        sha256(value).then(function (hash) {
+          if (hash === CODE_HASH) {
+            card.classList.add('is-granted');
+            error.textContent = '';
+            button.textContent = 'Access granted';
+            setTimeout(function () { window.location.href = UNLOCK_URL; }, 650);
+            return;
+          }
+          busy = false;
+          error.textContent = 'That code doesn\u2019t match. Please try again.';
+          card.classList.remove('is-wrong');
+          void card.offsetWidth;
+          card.classList.add('is-wrong');
+          input.select();
+        });
+      });
+
+      input.addEventListener('input', function () {
+        error.textContent = '';
+        card.classList.remove('is-wrong');
+      });
     })();
 
     // Pointer-following highlight on the glass panel.
