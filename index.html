@@ -201,8 +201,8 @@
       transform: none;
     }
 
-    /* Back arrow just above the card, on its left edge: the site's
-       curved-barb arrow pointing left, bare (no box). */
+    /* "Back to home" just above the card, on its left edge: the site's
+       curved-barb arrow pointing left, bare (no box), and its label. */
     .gate-stack {
       width: min(400px, 100%);
     }
@@ -212,8 +212,14 @@
     }
 
     .gate-back {
-      display: inline-grid;
-      place-items: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font: inherit;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
       margin: 0 0 14px 2px;
       padding: 6px 4px;
       border: 0;
@@ -409,8 +415,9 @@
 
   <div class="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" aria-describedby="gate-copy">
     <div class="gate-stack">
-    <button class="gate-back" type="button" aria-label="Go back" data-cursor-label="back">
+    <button class="gate-back" type="button" data-cursor-label="back">
       <svg viewBox="0 0 46 32" fill="none" stroke="currentColor" stroke-width="3.6" aria-hidden="true"><path d="M2 16H46"></path><path d="M16 0C16 9 10 16 2 16C10 16 16 23 16 32"></path></svg>
+      <span>Back to home</span>
     </button>
     <div class="gate-card">
       <div class="gate-logo" role="img" aria-label="Stealth Fund">
