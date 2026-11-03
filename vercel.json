@@ -1,4 +1,14 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/stealth-fund/manifesto", "destination": "https://stealth-fund.vercel.app/manifesto.html" },
+    { "source": "/stealth-fund/:path*", "destination": "https://stealth-fund.vercel.app/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/stealth-fund/:path*",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }]
+    }
+  ]
 }
