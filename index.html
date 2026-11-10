@@ -118,20 +118,82 @@
       justify-content: center;
     }
 
-    /* Star mark + wordmark, laid out with the original logo's proportions
-       (star 194px, gap 55px, text 923px of 1172px). */
-    .hero-logo {
+    /* The Concrete Star Monolith: eight cast-concrete wedges rendered live
+       in WebGL on a see-through canvas, so it floats on the glass. The star
+       fills about two thirds of the square; the rest is room for the
+       wedges to fly in from at the start. */
+    .hero-star {
       position: relative;
-      width: min(640px, 70%);
-      display: flex;
-      align-items: center;
-      gap: 4.69%;
+      width: min(760px, 82vmin);
+      aspect-ratio: 1;
       user-select: none;
+      -webkit-user-select: none;
     }
 
-    .hero-logo img {
+    .star-canvas,
+    .star-flat {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       display: block;
-      height: auto;
+    }
+
+    .star-canvas {
+      touch-action: none;
+      cursor: grab;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    .star-canvas.is-on {
+      opacity: 1;
+    }
+
+    .star-canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Flat mark, only shown where WebGL isn't available. */
+    .star-flat {
+      display: none;
+      padding: 22%;
+    }
+
+    .hero-star.is-flat .star-canvas {
+      display: none;
+    }
+
+    .hero-star.is-flat .star-flat {
+      display: block;
+    }
+
+    /* "Drag to rotate", set like the fine print; it fades once used. */
+    .star-hint {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 6%;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: max(10px, 0.72vw);
+      letter-spacing: 0.18em;
+      text-align: center;
+      text-transform: uppercase;
+      color: rgba(244, 241, 232, 0.4);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .hero-star.is-ready .star-hint {
+      opacity: 1;
+      transition-delay: 1.6s;
+    }
+
+    .hero-star.is-touched .star-hint,
+    .hero-star.is-flat .star-hint {
+      opacity: 0;
+      transition-delay: 0s;
     }
 
     .logo-star {
@@ -405,9 +467,10 @@
 
   <main>
     <section class="tile hero">
-      <div class="hero-logo" role="img" aria-label="Stealth Fund">
-        <img class="logo-star" src="stealth/logo-star.png" alt="" />
-        <img class="logo-text" src="stealth/logo-text.png" alt="" />
+      <div class="hero-star">
+        <canvas class="star-canvas cursor-link" data-cursor-label="drag" role="img" aria-label="Eight cast-concrete wedges arranged as an eight-point star around a square opening, floating and lit from the side"></canvas>
+        <svg class="star-flat" viewBox="-2.6 -2.6 5.2 5.2" role="img" aria-label="Eight-point star mark"><path fill="#a9a59e" d="M1 0L1 1L2 1ZM1 0L1 -1L2 -1ZM0 1L1 1L1 2ZM0 1L-1 1L-1 2ZM-1 0L-1 1L-2 1ZM-1 0L-1 -1L-2 -1ZM0 -1L1 -1L1 -2ZM0 -1L-1 -1L-1 -2Z"></path></svg>
+        <p class="star-hint" aria-hidden="true">Drag to rotate</p>
       </div>
       <p class="legal">© 2026 BlueBrown Partners LLC. All rights reserved.<br />Stealth Fund™ is a trademark of its respective owner.</p>
     </section>
@@ -501,6 +564,8 @@
 
       function open() {
         if (gate.classList.contains('is-open')) return;
+        // Don't cover the star while someone is turning it.
+        if (document.querySelector('.hero-star.is-dragging')) { later(); return; }
         gate.classList.add('is-open');
         setTimeout(function () { input.focus({ preventScroll: true }); }, 60);
       }
@@ -561,6 +626,399 @@
         error.textContent = '';
         card.classList.remove('is-wrong');
       });
+    })();
+
+    // Concrete Star Monolith. A ray-marched WebGL render of eight concrete
+    // wedges, drawn with alpha so it floats on the glass. It assembles on
+    // load, sways and slowly turns on its own, leans gently toward the
+    // pointer anywhere on the page, eases its wedges apart under the
+    // pointer, and spins with inertia when dragged. Resolution adapts to
+    // keep it smooth, drops while the access gate covers it, and stops
+    // when the tab is hidden.
+    (function () {
+      var wrap = document.querySelector('.hero-star');
+      var canvas = wrap.querySelector('.star-canvas');
+      var gate = document.querySelector('.gate');
+      var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      var motion = !reduce;
+
+      var VERT = 'attribute vec2 aPos;\nvoid main() { gl_Position = vec4(aPos, 0.0, 1.0); }';
+      var FRAG = [
+        '#ifdef GL_FRAGMENT_PRECISION_HIGH',
+        'precision highp float;',
+        '#else',
+        'precision mediump float;',
+        '#endif',
+        'uniform vec2 uRes; uniform float uTime; uniform mat3 uInv; uniform float uGap; uniform float uHalf;',
+        'uniform float uRelief; uniform float uWear; uniform vec3 uTint; uniform float uSeed; uniform float uDist;',
+        'uniform float uFocal; uniform float uBound; uniform float uBob;',
+        'const mat3 M3 = mat3(0.00, 0.80, 0.60, -0.80, 0.36, -0.48, -0.60, -0.48, 0.64);',
+        'const vec2 TA = vec2(1.0, 0.0); const vec2 TB = vec2(1.0, 1.0); const vec2 TC = vec2(2.0, 1.0);',
+        'float hash11(float p) { p = fract(p * 0.1031); p *= p + 33.33; p *= p + p; return fract(p); }',
+        'float hash12(vec2 p) { vec3 p3 = fract(vec3(p.xyx) * 0.1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }',
+        'float hash13(vec3 p3) { p3 = fract(p3 * 0.1031); p3 += dot(p3, p3.zyx + 31.32); return fract((p3.x + p3.y) * p3.z); }',
+        'float vnoise(vec3 x) {',
+        '  vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);',
+        '  float a = hash13(i); float b = hash13(i + vec3(1.0, 0.0, 0.0));',
+        '  float c = hash13(i + vec3(0.0, 1.0, 0.0)); float d = hash13(i + vec3(1.0, 1.0, 0.0));',
+        '  float e = hash13(i + vec3(0.0, 0.0, 1.0)); float g = hash13(i + vec3(1.0, 0.0, 1.0));',
+        '  float h = hash13(i + vec3(0.0, 1.0, 1.0)); float k = hash13(i + vec3(1.0, 1.0, 1.0));',
+        '  return mix(mix(mix(a, b, f.x), mix(c, d, f.x), f.y), mix(mix(e, g, f.x), mix(h, k, f.x), f.y), f.z);',
+        '}',
+        'float fbm(vec3 p) { float a = 0.5; float s = 0.0; for (int i = 0; i < 4; i++) { s += a * vnoise(p); p = p * 2.03 + vec3(17.1, 3.7, 9.2); a *= 0.5; } return s; }',
+        'float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2) {',
+        '  vec2 e0 = p1 - p0; vec2 e1 = p2 - p1; vec2 e2 = p0 - p2;',
+        '  vec2 v0 = p - p0; vec2 v1 = p - p1; vec2 v2 = p - p2;',
+        '  vec2 pq0 = v0 - e0 * clamp(dot(v0, e0) / dot(e0, e0), 0.0, 1.0);',
+        '  vec2 pq1 = v1 - e1 * clamp(dot(v1, e1) / dot(e1, e1), 0.0, 1.0);',
+        '  vec2 pq2 = v2 - e2 * clamp(dot(v2, e2) / dot(e2, e2), 0.0, 1.0);',
+        '  float s = sign(e0.x * e2.y - e0.y * e2.x);',
+        '  vec2 d0 = vec2(dot(pq0, pq0), s * (v0.x * e0.y - v0.y * e0.x));',
+        '  vec2 d1 = vec2(dot(pq1, pq1), s * (v1.x * e1.y - v1.y * e1.x));',
+        '  vec2 d2 = vec2(dot(pq2, pq2), s * (v2.x * e2.y - v2.y * e2.x));',
+        '  vec2 d = min(min(d0, d1), d2);',
+        '  return -sqrt(d.x) * sign(d.y);',
+        '}',
+        'float extrude(float d2, float dz) { return min(max(d2, dz), 0.0) + length(max(vec2(d2, dz), 0.0)); }',
+        'float map(vec3 p) {',
+        '  float par = sign(p.x) * sign(p.y); vec2 q = abs(p.xy);',
+        '  if (q.y > q.x) { q = q.yx; par = -par; }',
+        '  float bd = min(q.y, (q.x - q.y) * 0.7071);',
+        '  q -= uGap * vec2(0.8944, 0.4472);',
+        '  float az = abs(p.z);',
+        '  float d2 = sdTriangle(q, TA, TB, TC);',
+        '  float dFat = extrude(d2, az - uHalf - abs(uRelief));',
+        '  if (dFat > 0.25) { return dFat - 0.06; }',
+        '  float dz = az - uHalf - uRelief * par;',
+        '  vec3 pr = M3 * p;',
+        '  float n1 = vnoise(pr * 1.7 + uSeed); float n2 = vnoise(pr * 6.1 + 17.0);',
+        '  float big = smoothstep(0.5, 0.9, n1);',
+        '  float cut = uWear * (0.012 + 0.05 * n2 + 0.2 * big);',
+        '  d2 = max(d2, dot(q - TC, vec2(0.9239, 0.3827)) + cut);',
+        '  d2 = max(d2, dot(q - TA, vec2(-0.3827, -0.9239)) + cut);',
+        '  float r = 0.012 + 0.016 * uWear * n2;',
+        '  vec2 w = vec2(d2, dz) + r;',
+        '  float d = min(max(w.x, w.y), 0.0) + length(max(w, 0.0)) - r;',
+        '  float ch = uWear * (0.2 * big + 0.03 * n2 - 0.012);',
+        '  d = max(d, (d2 + dz + ch) * 0.7071);',
+        '  d += uWear * 0.008 * (n2 - 0.5);',
+        '  return min(d, max(dFat, bd + max(0.316 * uGap, 0.02)));',
+        '}',
+        'vec3 calcNormal(vec3 p) { vec2 e = vec2(0.0015, -0.0015); return normalize(e.xyy * map(p + e.xyy) + e.yyx * map(p + e.yyx) + e.yxy * map(p + e.yxy) + e.xxx * map(p + e.xxx)); }',
+        'float softShadow(vec3 ro, vec3 rd) {',
+        '  float b = dot(ro, rd); float c = dot(ro, ro) - uBound * uBound;',
+        '  float tMax = -b + sqrt(max(b * b - c, 0.0));',
+        '  float res = 1.0; float t = 0.02;',
+        '  for (int i = 0; i < 28; i++) { float h = map(ro + rd * t); res = min(res, 10.0 * h / t); t += clamp(h, 0.015, 0.6); if (res < 0.004 || t > tMax) break; }',
+        '  return clamp(res, 0.0, 1.0);',
+        '}',
+        'float calcAO(vec3 p, vec3 n) { float occ = 0.0; float sca = 1.0; for (int i = 0; i < 5; i++) { float h = 0.01 + 0.11 * float(i) / 4.0; float d = map(p + n * h); occ += (h - d) * sca; sca *= 0.9; } return clamp(1.0 - 2.4 * occ, 0.0, 1.0); }',
+        'vec3 surf(vec3 p, float wz) {',
+        '  vec3 pr = M3 * p;',
+        '  float bx = p.x / 0.27 + 0.5; float bi = floor(bx); float fx = bx - bi;',
+        '  float e1 = min(fx, 1.0 - fx) * 0.27;',
+        '  float fy = fract(p.y / 1.9 + 0.31); float e2 = abs(fy - 0.5) * 1.9;',
+        '  float seam = (1.0 - smoothstep(0.0, 0.013, min(e1, e2))) * wz;',
+        '  float grain = vnoise(vec3(p.x * 44.0, p.y * 2.1, bi * 7.3));',
+        '  float lay = vnoise(vec3(p.z * 28.0, (p.x + p.y) * 1.2, (p.x - p.y) * 1.2));',
+        '  float m = fbm(pr * 4.3 + 11.0);',
+        '  float pmask = smoothstep(0.3, 0.7, vnoise(pr * 2.6 + 21.0 + uSeed));',
+        '  float pitS = smoothstep(0.76, 0.88, vnoise(pr * 23.0 + 5.0));',
+        '  float pitL = smoothstep(0.84, 0.93, vnoise(pr * 9.0 + 40.0));',
+        '  float pit = max(pitS * pmask, pitL);',
+        '  float micro = vnoise(pr * 52.0);',
+        '  float h = 0.6 * m;',
+        '  h += wz * (0.12 * hash11(bi * 1.9 + 4.0) + 0.15 * grain - 0.9 * seam);',
+        '  h += (1.0 - wz) * (0.5 * lay + 0.25 * micro);',
+        '  h -= 0.9 * pit; h += 0.10 * micro;',
+        '  return vec3(h, pit, seam);',
+        '}',
+        'vec3 shade(vec3 p, vec3 rd) {',
+        '  vec3 n = calcNormal(p);',
+        '  float az = abs(n.z);',
+        '  float wz = smoothstep(0.55, 0.85, az);',
+        '  float brk = smoothstep(0.14, 0.32, az) * (1.0 - smoothstep(0.72, 0.92, az));',
+        '  vec3 up = az < 0.9 ? vec3(0.0, 0.0, 1.0) : vec3(1.0, 0.0, 0.0);',
+        '  vec3 t1 = normalize(cross(up, n)); vec3 t2 = cross(n, t1);',
+        '  float be = 0.004;',
+        '  vec3 s0 = surf(p, wz);',
+        '  float h1 = surf(p + t1 * be, wz).x; float h2 = surf(p + t2 * be, wz).x;',
+        '  float bs = 0.009 * (1.0 + 1.5 * brk);',
+        '  vec3 nb = normalize(n - bs * ((h1 - s0.x) * t1 + (h2 - s0.x) * t2) / be);',
+        '  vec3 pr = M3 * p;',
+        '  float mot = fbm(pr * 1.7 + 30.0 + uSeed);',
+        '  vec3 alb = uTint * (0.56 + 0.92 * mot);',
+        '  float pid = step(0.0, p.x) + 2.0 * step(0.0, p.y) + 4.0 * step(abs(p.x), abs(p.y));',
+        '  alb *= 0.92 + 0.16 * hash11(pid * 3.7 + uSeed);',
+        '  float bi = floor(p.x / 0.27 + 0.5);',
+        '  alb *= 1.0 + wz * 0.10 * (hash11(bi * 1.9 + 4.0) - 0.5);',
+        '  float streak = vnoise(vec3(p.x * 6.5, p.y * 0.75, p.z * 2.0 + 3.0));',
+        '  alb *= 1.0 - wz * 0.22 * smoothstep(0.5, 0.9, streak);',
+        '  alb *= 1.0 - 0.55 * s0.y; alb *= 1.0 - 0.32 * s0.z;',
+        '  alb *= mix(0.84, 1.0, wz); alb *= 1.0 + 0.14 * brk;',
+        '  alb *= mix(vec3(1.03, 1.0, 0.95), vec3(0.96, 0.99, 1.04), vnoise(pr * 2.9 + 7.0));',
+        '  vec3 l1 = uInv * normalize(vec3(0.90, 0.42, 0.08));',
+        '  vec3 l2 = uInv * normalize(vec3(-0.75, -0.35, 0.55));',
+        '  vec3 l3 = uInv * normalize(vec3(-0.55, 0.55, -0.62));',
+        '  vec3 v = -rd;',
+        '  float ao = calcAO(p, n) * (1.0 - 0.5 * s0.y);',
+        '  float nl1 = max(dot(nb, l1), 0.0) * smoothstep(-0.06, 0.12, dot(n, l1));',
+        '  float sh = 0.0;',
+        '  if (nl1 > 0.002) { sh = softShadow(p + n * 0.014, l1); }',
+        '  vec3 hv = normalize(l1 + v);',
+        '  float spec = pow(max(dot(nb, hv), 0.0), 26.0) * 0.10 * (1.0 - s0.y);',
+        '  vec3 keyC = vec3(1.0, 0.95, 0.88) * 1.15;',
+        '  vec3 col = (alb * nl1 + spec) * keyC * sh * (0.6 + 0.4 * ao);',
+        '  col += alb * vec3(0.62, 0.72, 0.90) * 0.13 * (0.3 + 0.7 * max(dot(nb, l2), 0.0)) * ao;',
+        '  col += alb * vec3(0.80, 0.88, 1.0) * 0.22 * max(dot(nb, l3), 0.0) * ao;',
+        '  col += alb * 0.02 * ao;',
+        '  return col;',
+        '}',
+        'vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }',
+        'void main() {',
+        '  vec2 uv = (2.0 * gl_FragCoord.xy - uRes) / uRes.y;',
+        '  vec3 ro = uInv * vec3(0.0, -uBob, uDist);',
+        '  vec3 rd = uInv * normalize(vec3(uv, -uFocal));',
+        '  float b = dot(ro, rd); float c = dot(ro, ro) - uBound * uBound;',
+        '  float disc = b * b - c;',
+        '  vec4 outc = vec4(0.0);',
+        '  if (disc > 0.0) {',
+        '    float sq = sqrt(disc);',
+        '    float t = max(-b - sq, 0.0); float tFar = -b + sq;',
+        '    float pix = 2.0 / (uRes.y * uFocal);',
+        '    float hitT = -1.0; float minR = 1000.0; float tMin = t;',
+        '    for (int i = 0; i < 110; i++) {',
+        '      float d = map(ro + rd * t);',
+        '      float r = d / (pix * t);',
+        '      if (r < minR) { minR = r; tMin = t; }',
+        '      if (r < 0.4) { hitT = t; break; }',
+        '      t += d * 0.7;',
+        '      if (t > tFar) break;',
+        '    }',
+        '    float cover = 1.0 - smoothstep(0.4, 1.5, minR);',
+        '    float ts = tMin;',
+        '    if (hitT > 0.0) { cover = 1.0; ts = hitT; }',
+        '    if (cover > 0.003) {',
+        '      vec3 col = aces(shade(ro + rd * ts, rd));',
+        '      col = pow(col, vec3(0.4545));',
+        '      col += (hash12(gl_FragCoord.xy + 61.0 * fract(uTime * 0.731)) - 0.5) * 0.028;',
+        '      outc = vec4(col * cover, cover);',
+        '    }',
+        '  }',
+        '  gl_FragColor = outc;',
+        '}'
+      ].join('\n');
+
+      function flat() {
+        wrap.classList.add('is-flat');
+      }
+
+      var gl = null, u = {};
+      try {
+        var opts = { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false, powerPreference: 'high-performance' };
+        gl = canvas.getContext('webgl', opts) || canvas.getContext('experimental-webgl', opts);
+      } catch (err) { gl = null; }
+      if (!gl) { flat(); return; }
+
+      function compile(type, src) {
+        var sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
+      }
+      var vs = compile(gl.VERTEX_SHADER, VERT);
+      var fs = compile(gl.FRAGMENT_SHADER, FRAG);
+      if (!vs || !fs) { flat(); return; }
+      var prog = gl.createProgram();
+      gl.attachShader(prog, vs);
+      gl.attachShader(prog, fs);
+      gl.bindAttribLocation(prog, 0, 'aPos');
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { flat(); return; }
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.clearColor(0, 0, 0, 0);
+      ['uRes', 'uTime', 'uInv', 'uGap', 'uHalf', 'uRelief', 'uWear', 'uTint', 'uSeed', 'uDist', 'uFocal', 'uBound', 'uBob'].forEach(function (n) {
+        u[n] = gl.getUniformLocation(prog, n);
+      });
+
+      // Fixed look from the design: concrete #a9a59e, wear 0.6, seed 5,
+      // depth 1, relief 0.12, gap 0.09.
+      gl.uniform3f(u.uTint, Math.pow(169 / 255, 2.2), Math.pow(165 / 255, 2.2), Math.pow(158 / 255, 2.2));
+      gl.uniform1f(u.uWear, 0.6);
+      gl.uniform1f(u.uSeed, 5 * 7.31);
+      gl.uniform1f(u.uHalf, 0.5);
+      gl.uniform1f(u.uRelief, 0.12);
+      gl.uniform1f(u.uDist, 14.5);
+      gl.uniform1f(u.uFocal, 3.9);
+
+      var lost = false;
+      canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); lost = true; }, false);
+      canvas.addEventListener('webglcontextrestored', function () { window.location.reload(); }, false);
+
+      // Interaction state: drag spin with inertia, a lean toward the
+      // pointer, and a gentle spread while the pointer is over the star.
+      var yaw = 0, pitch = 0, vy = 0, vp = 0, down = false, lx = 0, ly = 0;
+      var press = 0, hover = 0, overStar = false;
+      var leanX = 0, leanY = 0, aimX = 0, aimY = 0;
+      var GAP = 0.09, INTRO = 0.9, INTRO_TIME = 1.8;
+
+      function overCanvas(x, y) {
+        var r = canvas.getBoundingClientRect();
+        var dx = (x - (r.left + r.width / 2)) / (r.width / 2);
+        var dy = (y - (r.top + r.height / 2)) / (r.height / 2);
+        return dx * dx + dy * dy < 0.42;
+      }
+
+      window.addEventListener('pointermove', function (e) {
+        aimX = e.clientX / window.innerWidth - 0.5;
+        aimY = e.clientY / window.innerHeight - 0.5;
+        overStar = overCanvas(e.clientX, e.clientY);
+        if (!down) return;
+        var k = 3.4 / (canvas.clientWidth || 600);
+        var dx = (e.clientX - lx) * k, dy = (e.clientY - ly) * k;
+        lx = e.clientX;
+        ly = e.clientY;
+        yaw += dx;
+        pitch += dy;
+        vy = dx;
+        vp = dy;
+      }, { passive: true });
+
+      document.addEventListener('pointerleave', function () { aimX = aimY = 0; overStar = false; });
+
+      canvas.addEventListener('pointerdown', function (e) {
+        down = true;
+        lx = e.clientX;
+        ly = e.clientY;
+        vy = vp = 0;
+        wrap.classList.add('is-touched', 'is-dragging');
+        try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+      });
+
+      function release(e) {
+        down = false;
+        wrap.classList.remove('is-dragging');
+        // A finger leaves no hover, so stop leaning toward where it lifted.
+        if (e.pointerType !== 'mouse') { aimX = aimY = 0; overStar = false; }
+        try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+      }
+      canvas.addEventListener('pointerup', release);
+      canvas.addEventListener('pointercancel', release);
+
+      // Adaptive resolution: a fraction of the canvas's device pixels,
+      // stepped down when frames run slow and probed upward when fast.
+      var LEVELS = [0.3, 0.4, 0.5, 0.62, 0.75, 0.87, 1];
+      var lv = 3, locked = false, probing = false, acc = 0, accN = 0;
+      var t0 = 0, last = 0, started = false, skip = false, m = new Float32Array(9);
+
+      // Per-frame easing written for 60fps, scaled so it feels the same
+      // on 120Hz screens.
+      function ease(a, f) { return 1 - Math.pow(1 - a, f); }
+
+      function frame(now) {
+        requestAnimationFrame(frame);
+        if (lost || document.hidden) { last = now; return; }
+        if (!t0) t0 = now;
+        var dt = now - last;
+        last = now;
+        var t = (now - t0) / 1000;
+        var gated = gate && gate.classList.contains('is-open');
+        var f = Math.min(Math.max(dt, 1), 50) / 16.667;
+
+        if (down) {
+          vy *= Math.pow(0.7, f);
+          vp *= Math.pow(0.7, f);
+        } else {
+          yaw += vy * f;
+          pitch += vp * f;
+          vy *= Math.pow(0.94, f);
+          vp *= Math.pow(0.94, f);
+          if (Math.abs(vy) < 0.00004) vy = 0;
+          if (Math.abs(vp) < 0.00004) vp = 0;
+          // Settle back toward a pleasant three-quarter view over time.
+          yaw *= Math.pow(0.997, f);
+          pitch *= Math.pow(0.994, f);
+        }
+        pitch = Math.max(-1.0, Math.min(1.2, pitch));
+        press += ((down ? 1 : 0) - press) * ease(0.14, f);
+        hover += ((overStar && !gated ? 1 : 0) - hover) * ease(0.06, f);
+        leanX += (aimX - leanX) * ease(0.04, f);
+        leanY += (aimY - leanY) * ease(0.04, f);
+
+        // Behind the gate it's blurred: half the frame rate is plenty.
+        skip = gated && !skip;
+        if (skip) return;
+
+        var intro = 0;
+        if (motion && t < INTRO_TIME) {
+          var q = 1 - t / INTRO_TIME;
+          intro = q * q * q;
+        }
+        var sway = motion ? 1 : 0;
+        var e = GAP + INTRO * intro + 0.05 * hover + 0.06 * press + sway * 0.012 * (0.5 - 0.5 * Math.cos(t * 0.7));
+        var Y = 0.52 + yaw - 1.15 * intro + sway * 0.11 * Math.sin(t * 0.33) + 0.42 * leanX;
+        var P = -0.30 + pitch + 0.3 * intro + sway * 0.045 * Math.sin(t * 0.24) + 0.3 * leanY;
+        var roll = sway * t * 0.03;
+        var bob = sway * 0.04 * Math.sin(t * 0.52);
+        var reach = 2.25 + e;
+        var bound = Math.sqrt(reach * reach + 0.62 * 0.62) + 0.05;
+
+        if (started && !gated && dt > 0 && dt < 250) { acc += dt; accN++; }
+        if (accN >= 24) {
+          var avg = acc / accN;
+          acc = accN = 0;
+          if (probing) {
+            probing = false;
+            if (avg > 23) { lv = Math.max(0, lv - 1); locked = true; }
+          } else if (avg > 34 && lv > 0) {
+            lv--;
+            locked = true;
+          }
+          if (!probing && !locked && avg < 19.5 && lv < LEVELS.length - 1) { lv++; probing = true; }
+        }
+
+        // Behind the access gate it's blurred, so draw it small.
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var css = canvas.clientWidth || 600;
+        var side = Math.max(160, Math.round(css * dpr * (gated ? 0.4 : LEVELS[lv])));
+        if (canvas.width !== side) {
+          canvas.width = side;
+          canvas.height = side;
+        }
+        gl.viewport(0, 0, side, side);
+
+        // Camera-to-object rotation: yaw, then pitch, then a slow roll
+        // about the star's own axis.
+        var cy = Math.cos(Y), sy = Math.sin(Y), cp = Math.cos(P), sp = Math.sin(P);
+        var cr = Math.cos(roll), sr = Math.sin(roll);
+        var cols = [[cy, 0, sy], [sp * sy, cp, -sp * cy], [-cp * sy, sp, cp * cy]];
+        for (var i = 0; i < 3; i++) {
+          var x = cols[i][0], y = cols[i][1];
+          m[i * 3] = x * cr - y * sr;
+          m[i * 3 + 1] = x * sr + y * cr;
+          m[i * 3 + 2] = cols[i][2];
+        }
+
+        gl.uniformMatrix3fv(u.uInv, false, m);
+        gl.uniform2f(u.uRes, side, side);
+        gl.uniform1f(u.uTime, (motion ? t : 0) % 600);
+        gl.uniform1f(u.uGap, e);
+        gl.uniform1f(u.uBound, bound);
+        gl.uniform1f(u.uBob, bob);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        if (!started) {
+          started = true;
+          canvas.classList.add('is-on');
+          wrap.classList.add('is-ready');
+        }
+      }
+      requestAnimationFrame(frame);
     })();
 
     // Pointer-following highlight on the glass panel.
